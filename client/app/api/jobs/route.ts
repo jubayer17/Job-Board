@@ -36,8 +36,22 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Missing fields" }, { status: 400 });
         }
 
+        // Find employer and company
+        const employer = await prisma.employer.findUnique({
+            where: { id: session.user.id },
+            include: { companies: true }
+        });
+
+        if (!employer || !employer.companies[0]) {
+             return NextResponse.json({ error: "Employer/Company not found" }, { status: 403 });
+        }
+
         const job = await prisma.job.create({
-            data: { ...body, postedById: session.user.id }
+            data: { 
+                ...body, 
+                employerId: session.user.id,
+                companyId: employer.companies[0].id
+            }
         });
         return NextResponse.json(job);
     } catch (error) {
