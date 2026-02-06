@@ -7,7 +7,8 @@ export type JobWithPoster = {
     id: string; title: string; company: string; location: string; type: string;
     description: string; salary: string | null; logo: string | null; tags: string[];
     postedAt: Date; applyLink: string;
-    postedBy: { name: string | null; email: string | null; image: string | null; };
+    employer: { contactName: string; contactEmail: string; };
+    companyRelation: { companyName: string; };
 };
 
 export type JobFilters = {
@@ -20,7 +21,10 @@ export const getJobById = cache(async (id: string): Promise<JobWithPoster | null
     try {
         return await prisma.job.findUnique({
             where: { id },
-            include: { postedBy: { select: { name: true, email: true, image: true } } }
+            include: {
+                employer: { select: { contactName: true, contactEmail: true } },
+                companyRelation: { select: { companyName: true } }
+            }
         });
     } catch (error) {
         console.error("Fetch Job Error:", error);
@@ -64,7 +68,10 @@ export const getJobs = cache(async (filters: JobFilters = {}) => {
         return await prisma.job.findMany({
             where,
             orderBy: { postedAt: sort },
-            include: { postedBy: { select: { name: true, email: true, image: true } } }
+            include: {
+                employer: { select: { contactName: true, contactEmail: true } },
+                companyRelation: { select: { companyName: true } }
+            }
         });
     } catch (error) {
         console.error("Fetch Jobs Error:", error);
