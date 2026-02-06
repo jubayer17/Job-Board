@@ -6,6 +6,7 @@ import { MapPinIcon, ClockIcon, CurrencyDollarIcon, BriefcaseIcon, BookmarkIcon,
 import { useEffect, useState } from "react";
 
 import { formatDistanceToNow } from 'date-fns'
+import JobCard from './JobCard';
 
 interface Job {
     id: string;
@@ -99,68 +100,14 @@ export default function FeaturedJobs() {
                 {/* 3x3 Grid Layout */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {sortedJobs.map((job: Job) => (
-                        <div key={job.id} className="group relative bg-white border border-gray-200 p-8 hover:bg-purple-50 transition-all duration-300 hover:shadow-xl hover:border-purple-600">
-                            {/* Hover Top Border */}
-                            <div className="absolute top-0 left-0 w-0 h-1 bg-purple-600 transition-all duration-300 group-hover:w-full"></div>
-
-                            {/* Featured Badge */}
-                            <div className="absolute top-0 right-0">
-                                <div className="bg-purple-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1">
-                                    Featured
-                                </div>
-                            </div>
-
-                            <div className="flex justify-between items-start mb-6 mt-4">
-                                <div className="h-14 w-14 bg-white border border-gray-200 flex items-center justify-center font-bold text-xl text-gray-900 shadow-sm group-hover:border-purple-600 transition-colors">
-                                    {job.logo}
-                                </div>
-                                <span className="inline-flex items-center px-2.5 py-1 border border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wide bg-gray-50">
-                                    {job.type}
-                                </span>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-1">
-                                    {job.title}
-                                </h3>
-                                <div className="flex items-center gap-2 text-sm text-gray-500 font-medium">
-                                    <BriefcaseIcon className="h-4 w-4" />
-                                    <span>{job.company}</span>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3 mb-8">
-                                <div className="flex items-center gap-3 text-sm text-gray-500">
-                                    <MapPinIcon className="h-4 w-4 text-gray-400" />
-                                    <span>{job.location}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm font-bold text-gray-900">
-                                    <CurrencyDollarIcon className="h-4 w-4 text-purple-600" />
-                                    <span>{job.salary}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-sm text-gray-500">
-                                    <ClockIcon className="h-4 w-4 text-gray-400" />
-                                    <span>{formatDistanceToNow(new Date(job.postedAt), { addSuffix: true })}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2 mb-8">
-                                {job.tags.slice(0, 3).map((tag: string) => (
-                                    <span key={tag} className="inline-flex items-center px-2 py-1 bg-white text-[10px] font-bold text-gray-500 uppercase tracking-wider border border-gray-200">
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
-
-                            <div className="flex items-center gap-4 pt-6 border-t border-gray-100">
-                                <Link href={`/jobs/${job.id}`} className="flex-1 py-3 bg-white border border-gray-900 text-gray-900 text-center text-xs font-bold uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all duration-300">
-                                    Apply Now
-                                </Link>
-                                <button className="p-3 text-gray-400 hover:text-purple-600 border border-gray-200 hover:border-purple-600 transition-all duration-300">
-                                    <BookmarkIcon className="h-5 w-5" />
-                                </button>
-                            </div>
-                        </div>
+                        <JobCard
+                            variant="featured"
+                            key={job.id}
+                            job={{
+                                ...job,
+                                posted: formatDistanceToNow(new Date(job.postedAt), { addSuffix: true })
+                            }}
+                        />
                     ))}
                 </div>
             </div>
