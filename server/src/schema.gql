@@ -1,0 +1,119 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: String!
+  name: String!
+  email: String!
+}
+
+type Job {
+  id: String!
+  title: String!
+  company: String!
+  location: String!
+  type: String!
+  description: String!
+  status: String!
+  salary: String
+  tags: [String!]!
+  postedAt: DateTime!
+  employerId: String
+  companyId: String
+  applyLink: String
+  logo: String
+  salaryMin: Int
+  salaryMax: Int
+  applicantsCount: Int!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type EmployerStats {
+  activeJobs: Int!
+  totalApplicants: Int!
+  profileViews: Int!
+  avgTimeToHire: String!
+}
+
+type Company {
+  id: String!
+  companyName: String!
+  tradeLicense: String
+  yearOfEstablishment: String
+  industryType: String
+  description: String
+  address: String
+  websiteUrl: String
+  employerId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Employer {
+  id: String!
+  contactName: String!
+  contactDesignation: String!
+  contactEmail: String!
+  contactMobile: String!
+  companies: [Company!]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Query {
+  hello: String!
+  jobs: [Job!]!
+  myJobs(userId: String!): [Job!]!
+  employerJobs(employerId: String!): [Job!]!
+  employerStats(employerId: String!): EmployerStats!
+  employer(id: String!): Employer!
+}
+
+type Mutation {
+  signUp(data: CreateUserInput!): User!
+  login(data: LoginInput!): User!
+  createJob(data: CreateJobInput!, employerId: String!, isEmployer: Boolean): Job!
+  createEmployer(createEmployerInput: CreateEmployerInput!): Employer!
+  employerLogin(contactEmail: String!, password: String!): Employer
+}
+
+input CreateUserInput {
+  name: String!
+  email: String!
+  password: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreateJobInput {
+  title: String!
+  company: String!
+  location: String!
+  type: String!
+  description: String!
+  salary: String
+  tags: [String!]
+}
+
+input CreateEmployerInput {
+  contactName: String!
+  contactDesignation: String!
+  contactEmail: String!
+  contactMobile: String!
+  password: String!
+  companyName: String!
+  tradeLicense: String!
+  yearOfEstablishment: String!
+  industryType: String!
+  description: String!
+  address: String!
+  websiteUrl: String
+}
