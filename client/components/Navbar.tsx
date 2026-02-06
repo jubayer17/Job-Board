@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react"
 import Loading from "@/components/ui/Loading"
 import { Bars3Icon, XMarkIcon, BellIcon, ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline"
 import { usePathname } from "next/navigation"
+import UserMenu from "./UserMenu"
 
 const NAV_ITEMS = [
     { name: 'Find Jobs', href: '/jobs' },
@@ -71,16 +72,15 @@ export default function Navbar() {
                                         <span className="absolute top-2 right-2.5 w-1.5 h-1.5 bg-indigo-500" />
                                     </button>
                                 </div>
-                                <Link href="/dashboard" className={navLinkClass}>Dashboard</Link>
-                                <button onClick={() => signOut({ callbackUrl: "/" })} className={navLinkClass}>Sign Out</button>
-                                <Link href="/jobs/post" className="inline-flex items-center justify-center px-6 py-2 text-sm font-bold uppercase tracking-wide text-white bg-indigo-600 hover:bg-indigo-700 transition-all focus:ring-2 focus:ring-indigo-500">
+                                <UserMenu />
+                                <Link href={session.user.role === 'employer' ? "/employer/jobs/create" : "/employer/auth/sign-up"} className="inline-flex items-center justify-center px-6 py-2 text-sm font-bold uppercase tracking-wide text-white bg-indigo-600 hover:bg-indigo-700 transition-all focus:ring-2 focus:ring-indigo-500">
                                     Post a Job
                                 </Link>
                             </>
                         ) : (
                             <>
                                 <Link href="/auth/sign-in" className="text-sm font-bold uppercase tracking-wide text-gray-500 hover:text-gray-900 transition-colors">Sign In</Link>
-                                <Link href="/auth/sign-in" className="inline-flex items-center justify-center px-6 py-2 text-sm font-bold uppercase tracking-wide text-white bg-gray-900 hover:bg-black transition-all focus:ring-2 focus:ring-gray-900">
+                                <Link href="/employer/auth/sign-up" className="inline-flex items-center justify-center px-6 py-2 text-sm font-bold uppercase tracking-wide text-white bg-gray-900 hover:bg-black transition-all focus:ring-2 focus:ring-gray-900">
                                     Post a Job
                                 </Link>
                             </>
