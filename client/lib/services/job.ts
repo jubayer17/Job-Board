@@ -4,9 +4,24 @@ import { prisma } from "@/lib/prisma";
 
 // Types
 export type JobWithPoster = {
-    id: string; title: string; company: string; location: string; type: string;
-    description: string; salary: string | null; logo: string | null; tags: string[];
-    postedAt: Date; applyLink: string;
+    id: string;
+    title: string;
+    company: string;
+    location: string;
+    type: string;
+    vacancies: number | null;
+    experience: string | null;
+    education: string | null;
+    workplace: string | null;
+    jobContext: string | null;
+    gender: string | null;
+    deadline: Date | null;
+    description: string;
+    salary: string | null;
+    logo: string | null;
+    tags: string[];
+    postedAt: Date;
+    applyLink: string | null;
     employer: { contactName: string; contactEmail: string; };
     companyRelation: { companyName: string; };
 };
@@ -19,13 +34,14 @@ export type JobFilters = {
 // Fetch single job
 export const getJobById = cache(async (id: string): Promise<JobWithPoster | null> => {
     try {
-        return await prisma.job.findUnique({
+        const job = await prisma.job.findUnique({
             where: { id },
             include: {
                 employer: { select: { contactName: true, contactEmail: true } },
                 companyRelation: { select: { companyName: true } }
             }
         });
+        return job as unknown as JobWithPoster | null;
     } catch (error) {
         console.error("Fetch Job Error:", error);
         return null;
@@ -65,7 +81,7 @@ export const getJobs = cache(async (filters: JobFilters = {}) => {
     if (maxSalary) where.salaryMax = { lte: maxSalary };
 
     try {
-        return await prisma.job.findMany({
+        const jobs = await prisma.job.findMany({
             where,
             orderBy: { postedAt: sort },
             include: {
@@ -73,6 +89,7 @@ export const getJobs = cache(async (filters: JobFilters = {}) => {
                 companyRelation: { select: { companyName: true } }
             }
         });
+        return jobs as unknown as JobWithPoster[];
     } catch (error) {
         console.error("Fetch Jobs Error:", error);
         return [];
