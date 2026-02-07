@@ -1,7 +1,24 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, User } from '@prisma/client'
 import * as bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
+
+// Define types for our data
+type Employer = {
+  id: string;
+  contactName: string;
+  contactEmail: string;
+  // add other fields if needed for type safety
+};
+
+type CompanyWithLogo = {
+  id: string;
+  companyName: string;
+  employerId: string;
+  address: string | null;
+  logo: string;
+  websiteUrl: string | null;
+};
 
 const companies = [
   { name: 'Pathao', logo: 'P', location: 'Gulshan, Dhaka', website: 'https://pathao.com', description: 'Moving Bangladesh Forward. Pathao is the #1 Super App in Bangladesh.' },
@@ -52,7 +69,7 @@ async function main() {
   // Password for all employers
   const hashedPassword = await bcrypt.hash('password123', 10);
 
-  const createdEmployers = [];
+  const createdEmployers: Employer[] = [];
 
   // Create Employers
   for (const emp of employers) {
@@ -67,32 +84,32 @@ async function main() {
         password: hashedPassword,
       },
     });
-    createdEmployers.push(employer);
+    createdEmployers.push(employer as unknown as Employer);
     console.log(`Created/Found employer: ${employer.contactName}`);
   }
 
   // Create Companies and assign to random employers
-  const createdCompanies = [];
+  const createdCompanies: CompanyWithLogo[] = [];
   for (const companyInfo of companies) {
     const randomEmployer = createdEmployers[Math.floor(Math.random() * createdEmployers.length)];
-    
+
     let company = await prisma.company.findFirst({
-        where: { companyName: companyInfo.name, employerId: randomEmployer.id }
+      where: { companyName: companyInfo.name, employerId: randomEmployer.id }
     });
-    
+
     if (!company) {
-        company = await prisma.company.create({
-            data: {
-                companyName: companyInfo.name,
-                employerId: randomEmployer.id,
-                address: companyInfo.location,
-                websiteUrl: companyInfo.website,
-                description: companyInfo.description,
-                industryType: 'Technology',
-                tradeLicense: `TRD-${Math.floor(Math.random() * 100000)}`,
-                yearOfEstablishment: `${2000 + Math.floor(Math.random() * 23)}`
-            }
-        });
+      company = await prisma.company.create({
+        data: {
+          companyName: companyInfo.name,
+          employerId: randomEmployer.id,
+          address: companyInfo.location,
+          websiteUrl: companyInfo.website,
+          description: companyInfo.description,
+          industryType: 'Technology',
+          tradeLicense: `TRD-${Math.floor(Math.random() * 100000)}`,
+          yearOfEstablishment: `${2000 + Math.floor(Math.random() * 23)}`
+        }
+      });
     }
     createdCompanies.push({ ...company, logo: companyInfo.logo });
     console.log(`Created/Found company: ${company.companyName} for employer ${randomEmployer.contactName}`);
@@ -103,11 +120,15 @@ async function main() {
     const companyData = createdCompanies[Math.floor(Math.random() * createdCompanies.length)];
     const role = roles[Math.floor(Math.random() * roles.length)];
     const type = types[Math.floor(Math.random() * types.length)];
-    
+
     // Random date within last 30 days
     const daysAgo = Math.floor(Math.random() * 30);
     const postedAt = new Date();
     postedAt.setDate(postedAt.getDate() - daysAgo);
+
+    // Deadline 30 days after posting
+    const deadline = new Date(postedAt);
+    deadline.setDate(deadline.getDate() + 30);
 
     const job = await prisma.job.create({
       data: {
@@ -139,6 +160,13 @@ Benefits:
         salaryMin: role.min,
         salaryMax: role.max,
         postedAt: postedAt,
+        deadline: deadline,
+        vacancies: Math.floor(Math.random() * 5) + 1,
+        experience: '1 to 3 years',
+        education: 'Bachelor of Science (BSc) in Computer Science & Engineering',
+        workplace: Math.random() > 0.5 ? 'Work at office' : 'Hybrid',
+        jobContext: 'We are a fast-growing team looking for passionate individuals.',
+        gender: 'Both',
         employerId: companyData.employerId,
         companyId: companyData.id,
         company: companyData.companyName,
@@ -150,6 +178,72 @@ Benefits:
   }
 
   console.log('Seeding finished.')
+
+  // Create Users (Candidates)
+  const users = [
+    { name: 'Sadiqul Islam', email: 'sadiqul.islam@example.com', title: 'Frontend Developer' },
+    { name: 'Maria Hossain', email: 'maria.hossain@example.com', title: 'Product Designer' },
+    { name: 'Rafiqul Islam', email: 'rafiqul.islam@example.com', title: 'Backend Developer' },
+    { name: 'Tasnim Ahmed', email: 'tasnim.ahmed@example.com', title: 'Data Analyst' },
+    { name: 'Zarif Hasan', email: 'zarif.hasan@example.com', title: 'DevOps Engineer' }
+  ];
+
+  const createdUsers: User[] = [];
+  for (const u of users) {
+    const user = await prisma.user.upsert({
+      where: { email: u.email },
+      update: {},
+      create: {
+        name: u.name,
+        email: u.email,
+        password: hashedPassword,
+        // Removed bio and role as they don't exist in User schema
+      },
+    });
+    createdUsers.push(user);
+    console.log(`Created/Found user: ${user.name}`);
+  }
+
+  // Create Applications
+  // Get all jobs to apply to
+  const allJobs = await prisma.job.findMany();
+
+  if (allJobs.length > 0 && createdUsers.length > 0) {
+    console.log('Creating applications...');
+
+    for (const user of createdUsers) {
+      // Each user applies to 3-5 random jobs
+      const applicationCount = 3 + Math.floor(Math.random() * 3);
+
+      // Shuffle jobs to pick random ones
+      const shuffledJobs = [...allJobs].sort(() => 0.5 - Math.random());
+      const jobsToApply = shuffledJobs.slice(0, applicationCount);
+
+      for (const job of jobsToApply) {
+        // Check if already applied
+        const existingApplication = await prisma.application.findFirst({
+          where: {
+            jobId: job.id,
+            userId: user.id
+          }
+        });
+
+        if (!existingApplication) {
+          await prisma.application.create({
+            data: {
+              jobId: job.id,
+              userId: user.id,
+              status: ['PENDING', 'REVIEWED', 'INTERVIEWED'][Math.floor(Math.random() * 3)],
+              // Removed coverLetter as it doesn't exist in Application schema
+            }
+          });
+          console.log(`User ${user.name} applied to ${job.title} at ${job.company}`);
+        }
+      }
+    }
+  }
+
+  console.log('Applications seeded.');
 }
 
 main()
