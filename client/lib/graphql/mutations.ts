@@ -12,6 +12,15 @@ export const CREATE_JOB_MUTATION = gql`
       salary
       tags
       postedAt
+      deadline
+      vacancies
+      experience
+      education
+      workplace
+      jobContext
+      gender
+      applyLink
+      logo
     }
   }
 `;
