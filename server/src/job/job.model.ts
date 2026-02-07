@@ -32,6 +32,27 @@ export class Job {
     @Field(() => Date)
     postedAt: Date;
 
+    @Field(() => Date, { nullable: true })
+    deadline?: Date | null;
+
+    @Field(() => Int, { nullable: true })
+    vacancies?: number | null;
+
+    @Field(() => String, { nullable: true })
+    experience?: string | null;
+
+    @Field(() => String, { nullable: true })
+    education?: string | null;
+
+    @Field(() => String, { nullable: true })
+    workplace?: string | null;
+
+    @Field(() => String, { nullable: true })
+    jobContext?: string | null;
+
+    @Field(() => String, { nullable: true })
+    gender?: string | null;
+
     @Field(() => String, { nullable: true })
     employerId?: string | null;
 
