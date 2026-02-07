@@ -84,6 +84,13 @@ model Job {
   salaryMin    Int?          // For filtering/sorting
   salaryMax    Int?          // For filtering/sorting
   postedAt     DateTime      @default(now())
+  deadline     DateTime?
+  vacancies    Int?          @default(1)
+  experience   String?       // e.g. "1 to 3 years"
+  education    String?       // e.g. "Bachelor of Science (BSc) in CSE"
+  workplace    String?       // e.g. "Work at office", "Remote", "Hybrid"
+  jobContext   String?       @db.Text
+  gender       String?       @default("Both") // Male, Female, Both
   
   employer     Employer     @relation(fields: [employerId], references: [id])
   employerId   String
