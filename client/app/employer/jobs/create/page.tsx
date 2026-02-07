@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -10,6 +10,7 @@ import { CREATE_JOB_MUTATION } from "@/lib/graphql/mutations";
 import { GET_EMPLOYER_PROFILE } from "@/lib/graphql/queries";
 import { createJobSchema, CreateJobValues } from "@/lib/schemas/job-schema";
 import { useEffect } from "react";
+import RichTextEditor from "@/components/ui/RichTextEditor";
 
 interface EmployerProfileData {
     employer: {
@@ -40,7 +41,8 @@ export default function CreateJobPage() {
         handleSubmit,
         formState: { errors },
         setValue,
-        watch
+        watch,
+        control
     } = useForm<CreateJobValues>({
         resolver: zodResolver(createJobSchema),
         defaultValues: {
@@ -332,35 +334,50 @@ export default function CreateJobPage() {
                             {/* Education */}
                             <div className="sm:col-span-2">
                                 <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Education (Optional)</label>
-                                <input
-                                    type="text"
-                                    {...register("education")}
-                                    className="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-none shadow-sm text-sm py-3"
-                                    placeholder="e.g. Bachelor of Science (BSc) in Computer Science & Engineering"
+                                <Controller
+                                    name="education"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <RichTextEditor
+                                            value={field.value || ""}
+                                            onChange={field.onChange}
+                                            placeholder="e.g. Bachelor of Science (BSc) in Computer Science & Engineering"
+                                        />
+                                    )}
                                 />
                             </div>
 
                             {/* Job Context */}
                             <div className="sm:col-span-2">
                                 <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Job Context (Optional)</label>
-                                <textarea
-                                    {...register("jobContext")}
-                                    rows={3}
-                                    className="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-none shadow-sm text-sm py-3 resize-y"
-                                    placeholder="Briefly explain the context of this role..."
+                                <Controller
+                                    name="jobContext"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <RichTextEditor
+                                            value={field.value || ""}
+                                            onChange={field.onChange}
+                                            placeholder="Briefly explain the context of this role..."
+                                        />
+                                    )}
                                 />
                             </div>
 
                             {/* Description */}
                             <div className="sm:col-span-2">
                                 <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Job Responsibilities & Requirements</label>
-                                <textarea
-                                    {...register("description")}
-                                    rows={8}
-                                    className="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-none shadow-sm text-sm py-3 resize-y"
-                                    placeholder="Detailed description of responsibilities and requirements..."
+                                <Controller
+                                    name="description"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="Detailed description of responsibilities and requirements..."
+                                            error={errors.description?.message}
+                                        />
+                                    )}
                                 />
-                                {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
                             </div>
 
                             {/* Apply Link */}
