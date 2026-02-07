@@ -1,82 +1,66 @@
-# Job Board Client
+# Job Posting Website - Client
 
-This is the frontend application for the Job Posting Website, built with **Next.js**, **TypeScript**, and **TailwindCSS**. It connects to the NestJS backend via GraphQL.
+A modern job posting platform frontend built with Next.js 14 (App Router), tailored for the Bangladeshi market context.
 
-## 🛠 Tech Stack
+## � Tech Stack
 
-- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
-- **Styling:** [TailwindCSS](https://tailwindcss.com/) & [Shadcn/UI](https://ui.shadcn.com/)
-- **Data Fetching:** [Apollo Client](https://www.apollographql.com/docs/react/)
-- **Authentication:** [NextAuth.js](https://next-auth.js.org/)
-- **Forms:** React Hook Form & Zod
-- **Database Access:** Prisma (for Auth & Server Actions)
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [Shadcn UI](https://ui.shadcn.com/)
+- **State/Data**: [Apollo Client](https://www.apollographql.com/docs/react/) (GraphQL)
+- **Authentication**: [NextAuth.js](https://next-auth.js.org/) (v4)
+- **Forms**: React Hook Form + Zod
 
-## 🚀 Getting Started
+## ✨ Features
 
-### 1. Prerequisites
+- **Candidate Portal**:
+  - Browse and filter jobs (BD-vibed data).
+  - Apply for jobs.
+  - User authentication (Email/Password & GitHub).
+- **Employer Dashboard**:
+  - Post and manage job listings.
+  - Manage company profile (Logo, Description, Website).
+  - View applications.
+- **Authentication**:
+  - Separate login flows for Candidates and Employers.
+  - **Note**: Uses JWT strategy for sessions (stored in cookies), not database sessions.
 
-- Node.js (v18+)
-- The **Server** application must be running (usually on port 4000)
+## 🛠️ Getting Started
 
-### 2. Installation
+1. **Install Dependencies**
 
-```bash
-cd client
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-### 3. Environment Setup
+2. **Environment Setup**
+   Create a `.env` file in the root of the `client` directory:
 
-Create a `.env` file in the `client` directory:
+   ```env
+   DATABASE_URL="postgresql://..." # Same as server
+   NEXTAUTH_URL="http://localhost:3000"
+   NEXTAUTH_SECRET="your-secret-key"
+   GITHUB_CLIENT_ID="your-github-id"
+   GITHUB_CLIENT_SECRET="your-github-secret"
+   ```
 
-```env
-# Database connection (Must match the server's DB)
-DATABASE_URL="postgresql://user:password@localhost:5432/jobboard?schema=public"
-
-# NextAuth Configuration
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-super-secret-key"
-
-# GraphQL API URL
-NEXT_PUBLIC_GRAPHQL_API_URL="http://localhost:4000/graphql"
-
-# OAuth Providers (Optional)
-GITHUB_CLIENT_ID="your-github-id"
-GITHUB_CLIENT_SECRET="your-github-secret"
-```
-
-### 4. Prisma Client Generation
-
-Since the database schema is managed in the `server` folder, the client needs to generate its own Prisma Client types based on that schema.
-
-```bash
-# Generate Prisma Client from the server's schema
-npx prisma generate --schema=../server/prisma/schema.prisma
-```
-
-### 5. Running the Application
-
-```bash
-npm run dev
-```
-
-The application will be available at `http://localhost:3000`.
-
-## ⚡️ Key Features
-
-- **Public Job Board:** Browse and search for jobs without logging in.
-- **Authentication:** 
-  - **Candidates:** Sign up/Login to apply for jobs.
-  - **Employers:** Dedicated login to manage companies and job postings.
-- **Employer Dashboard:**
-  - Create and manage Company Profiles.
-  - Post new Jobs.
-  - View Applicants.
-- **Job Applications:** Candidates can apply to jobs directly.
+3. **Run Development Server**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ## 📂 Project Structure
 
-- `app/` - Next.js App Router pages and layouts.
-- `components/` - Reusable UI components.
-- `lib/` - Utilities, GraphQL queries, and service functions.
-- `providers/` - React Context providers (Apollo, Session).
+- `/app`: Next.js App Router pages and layouts.
+  - `/employer`: Employer-specific routes (Dashboard, Company Page).
+  - `/jobs`: Job listing and details pages.
+- `/components`: Reusable UI components (shadcn/ui).
+- `/lib`: Utility functions, Apollo Client setup, and Auth configuration.
+
+## � Authentication Note
+
+This project uses `CredentialsProvider` for email/password login, which requires the **JWT strategy**.
+
+- Sessions are **not** stored in the database `Session` table.
+- Sessions are stored in encrypted browser cookies.
+- This is the expected behavior for this configuration.
