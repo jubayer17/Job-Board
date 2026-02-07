@@ -1,74 +1,78 @@
-# Job Board Server
+# Job Posting Website - Server
 
-This is the backend API for the Job Posting Website, built with **NestJS**, **GraphQL**, and **Prisma**.
+The backend API for the job posting platform, built with NestJS, GraphQL, and Prisma.
 
-## 🛠 Tech Stack
+## 🚀 Tech Stack
 
-- **Framework:** [NestJS](https://nestjs.com/)
-- **API:** GraphQL (Code-first approach)
-- **Database:** PostgreSQL
-- **ORM:** [Prisma](https://www.prisma.io/)
-- **Language:** TypeScript
+- **Framework**: [NestJS](https://nestjs.com/)
+- **API**: GraphQL (Code First)
+- **Database**: PostgreSQL
+- **ORM**: [Prisma](https://www.prisma.io/)
+- **Authentication**: JWT & NextAuth Integration
 
-## 🚀 Getting Started
+## ✨ Features
 
-### 1. Prerequisites
+- **GraphQL API**: Comprehensive API for Jobs, Employers, Companies, and Users.
+- **Database Management**: Prisma schema managing complex relations (Job -> Employer -> Company).
+- **Seeding**: Robust seed script to populate the database with realistic Bangladeshi context data.
+- **Authentication**: Handles Employer login mutations and User queries.
 
-- Node.js (v18+)
-- PostgreSQL installed and running (or use a cloud provider like Neon/Supabase)
+## 🛠️ Getting Started
 
-### 2. Installation
+1. **Install Dependencies**
 
-```bash
-cd server
-npm install
-```
+   ```bash
+   npm install
+   ```
 
-### 3. Environment Setup
+2. **Environment Setup**
+   Create a `.env` file in the root of the `server` directory:
 
-Create a `.env` file in the `server` directory:
+   ```env
+   DATABASE_URL="postgresql://user:password@host:port/dbname?schema=public"
+   ```
 
-```env
-# Database connection string
-DATABASE_URL="postgresql://user:password@localhost:5432/jobboard?schema=public"
+3. **Database Setup**
 
-# API Port
-PORT=4000
-```
+   ```bash
+   # Generate Prisma Client
+   npx prisma generate
 
-### 4. Database Setup
+   # Push Schema to Database
+   npx prisma db push
+   # OR
+   npx prisma migrate dev
+   ```
 
-Run the migrations to set up your database schema:
+4. **🌱 Seed Database (Important)**
+   Populate the database with 30+ jobs, employers, and companies (BD context):
 
-```bash
-# Run migrations
-npx prisma migrate dev
+   ```bash
+   npx prisma db seed
+   ```
 
-# Seed the database with initial data (Employers, Companies, Jobs)
-npx prisma db seed
-```
-
-### 5. Running the Server
-
-```bash
-# Development mode
-npm run start:dev
-
-# Production mode
-npm run start:prod
-```
-
-The GraphQL Playground will be available at `http://localhost:4000/graphql`.
+5. **Run Development Server**
+   ```bash
+   npm run start:dev
+   ```
+   The GraphQL Playground will be available at [http://localhost:4000/graphql](http://localhost:4000/graphql).
 
 ## 📂 Project Structure
 
-- `src/` - NestJS modules and business logic
-- `prisma/` - Database schema, migrations, and seed scripts
-- `test/` - E2E tests
+- `/src`: NestJS source code.
+  - `/job`: Job module (Service, Resolver).
+  - `/employer`: Employer module.
+  - `/company`: Company module.
+  - `/user`: User module.
+- `/prisma`: Database schema and seed script.
+  - `schema.prisma`: The single source of truth for the database model.
+  - `seed.ts`: Script to generate dummy data.
 
-## 📜 Available Scripts
+## 📝 Seed Data
 
-- `npm run start:dev` - Starts the development server with hot-reload.
-- `npx prisma generate` - Generates the Prisma Client.
-- `npx prisma migrate dev` - Applies schema changes to the database.
-- `npx prisma db seed` - Populates the database with dummy data.
+The `seed.ts` script automatically creates:
+
+- **Employers**: Real-world contact personas (e.g., HR Heads from top BD companies).
+- **Companies**: Leading BD companies (Pathao, bKash, Grameenphone, etc.) with logos and descriptions.
+- **Jobs**: 30+ job postings linked to these companies with realistic descriptions and salaries.
+- **Users & Applications**: Dummy candidates and job applications.
