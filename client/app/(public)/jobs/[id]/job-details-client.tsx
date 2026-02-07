@@ -5,8 +5,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { JobWithPoster } from "@/lib/services/job";
 import { HeaderCard } from "./_components/HeaderCard";
-import { DescriptionCard } from "./_components/DescriptionCard";
-import { ResponsibilitiesCard } from "./_components/ResponsibilitiesCard";
+import { InfoCard } from "./_components/InfoCard";
 import { JobOverviewCard } from "./_components/JobOverviewCard";
 import { HiringManagerCard } from "./_components/HiringManagerCard";
 
@@ -22,6 +21,11 @@ export default function JobDetailsClient({ job, initialApplicationStatus, curren
     const router = useRouter();
 
     const handleApply = async () => {
+        if (job.applyLink) {
+            window.open(job.applyLink, "_blank");
+            return;
+        }
+
         if (!currentUserId) return window.location.href = "/auth/sign-in";
         if (status) return toast.error("You have already applied to this job");
 
@@ -64,8 +68,9 @@ export default function JobDetailsClient({ job, initialApplicationStatus, curren
                     {/* LEFT COLUMN - Main Content */}
                     <div className="lg:col-span-2 space-y-8">
                         <HeaderCard job={job} />
-                        <DescriptionCard description={job.description} />
-                        <ResponsibilitiesCard />
+                        <InfoCard title="Job Context" content={job.jobContext} />
+                        <InfoCard title="Job Description" content={job.description} />
+                        <InfoCard title="Education Requirements" content={job.education} />
                     </div>
 
                     {/* RIGHT COLUMN - Sidebar */}
