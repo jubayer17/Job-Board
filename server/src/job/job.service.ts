@@ -16,17 +16,20 @@ export class JobService {
             include: { companies: true },
         });
 
-        if (!employer || !employer.companies || employer.companies.length === 0) {
-            throw new Error('Employer or Company not found');
+        if (!employer) {
+            throw new Error('Employer not found');
         }
 
-        const companyId = employer.companies[0].id; // Assuming one company per employer for now
+        // Verify company belongs to employer
+        const companyExists = employer.companies.find(c => c.id === data.companyId);
+        if (!companyExists) {
+            throw new Error('Invalid Company ID or Company does not belong to this employer');
+        }
 
         return this.prisma.job.create({
             data: {
                 ...data,
                 employerId: userId,
-                companyId: companyId,
                 status: 'active',
             },
         });
