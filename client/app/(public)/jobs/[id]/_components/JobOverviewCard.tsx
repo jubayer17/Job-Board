@@ -41,6 +41,14 @@ export const JobOverviewCard = ({ job, status, isLoading, handleApply }: JobOver
             <div className="mb-8">
                 <DetailRow icon={CurrencyDollarIcon} label="Salary" value={job.salary} />
                 <DetailRow icon={BriefcaseIcon} label="Job Type" value={job.type} />
+                <DetailRow icon={BriefcaseIcon} label="Vacancies" value={job.vacancies?.toString() || null} />
+                <DetailRow icon={BriefcaseIcon} label="Experience" value={job.experience} />
+                <DetailRow icon={BriefcaseIcon} label="Workplace" value={job.workplace} />
+                <DetailRow icon={BriefcaseIcon} label="Gender" value={job.gender} />
+                {job.deadline && (
+                    <DetailRow icon={CalendarIcon} label="Deadline" value={format(new Date(job.deadline), "MMM d, yyyy")} />
+                )}
+
                 <DetailRow icon={MapPinIcon} label="Location" value={job.location} />
                 <DetailRow icon={CalendarIcon} label="Posted" value={format(new Date(job.postedAt), "MMM d, yyyy")} />
             </div>
