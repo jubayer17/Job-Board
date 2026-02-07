@@ -19,6 +19,13 @@ type Job {
   salary: String
   tags: [String!]!
   postedAt: DateTime!
+  deadline: DateTime
+  vacancies: Int
+  experience: String
+  education: String
+  workplace: String
+  jobContext: String
+  gender: String
   employerId: String
   companyId: String
   applyLink: String
@@ -101,6 +108,16 @@ input CreateJobInput {
   description: String!
   salary: String
   tags: [String!]
+  deadline: DateTime
+  vacancies: Float
+  experience: String
+  education: String
+  workplace: String
+  jobContext: String
+  gender: String
+  applyLink: String
+  logo: String
+  companyId: String!
 }
 
 input CreateEmployerInput {
