@@ -142,7 +142,7 @@ export default function EmployerDashboard() {
         </div>
 
         {employerJobs.length > 0 ? (
-          <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-2 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
             {employerJobs.map((job: any) => (
               <JobCard
                 key={job.id}
