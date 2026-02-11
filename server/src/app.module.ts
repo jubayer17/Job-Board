@@ -12,6 +12,8 @@ import { JobModule } from './job/job.module';
 import { EmployerModule } from './employer/employer.module';
 import { PrismaModule } from './prisma.module';
 
+
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -27,6 +29,9 @@ import { PrismaModule } from './prisma.module';
     UserModule,
     JobModule,
     EmployerModule,
+
+
+
   ],
   controllers: [AppController],
   providers: [AppService],
