@@ -3,12 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getJobById } from "@/lib/services/job";
-import dynamic from "next/dynamic";
-
-const ApplicationForm = dynamic(() => import("@/components/application-form"), {
-    ssr: false,
-    loading: () => <p>Loading application form…</p>,
-});
+import ApplicationForm from "@/components/application-form";
 
 export default async function ApplyPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: jobId } = await params;
