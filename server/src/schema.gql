@@ -30,6 +30,9 @@ type Job {
   companyId: String
   applyLink: String
   logo: String
+  logoPublicId: String
+  logoOriginalName: String
+  logoUploadedAt: DateTime
   salaryMin: Int
   salaryMax: Int
   applicantsCount: Int!
@@ -117,6 +120,9 @@ input CreateJobInput {
   gender: String
   applyLink: String
   logo: String
+  logoPublicId: String
+  logoOriginalName: String
+  logoUploadedAt: DateTime
   companyId: String!
 }
 

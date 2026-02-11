@@ -50,6 +50,15 @@ export class CreateJobInput {
     @Field({ nullable: true })
     logo?: string;
 
+    @Field({ nullable: true })
+    logoPublicId?: string;
+
+    @Field({ nullable: true })
+    logoOriginalName?: string;
+
+    @Field({ nullable: true })
+    logoUploadedAt?: Date;
+
     @Field()
     companyId: string;
 }

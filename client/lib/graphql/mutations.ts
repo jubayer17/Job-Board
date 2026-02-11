@@ -21,6 +21,9 @@ export const CREATE_JOB_MUTATION = gql`
       gender
       applyLink
       logo
+      logoPublicId
+      logoOriginalName
+      logoUploadedAt
     }
   }
 `;

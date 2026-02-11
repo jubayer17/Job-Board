@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import { CREATE_JOB_MUTATION } from "@/lib/graphql/mutations";
 import { GET_EMPLOYER_PROFILE } from "@/lib/graphql/queries";
 import { createJobSchema, CreateJobValues } from "@/lib/schemas/job-schema";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import RichTextEditor from "@/components/ui/RichTextEditor";
 
 interface EmployerProfileData {
@@ -22,11 +22,10 @@ interface EmployerProfileData {
     };
 }
 
-import { CldUploadWidget } from 'next-cloudinary';
-
 export default function CreateJobPage() {
     const { data: session } = useSession();
     const router = useRouter();
+    const [isUploading, setIsUploading] = useState(false);
 
     // Fetch employer profile to get companies
     const { data: employerData, loading: employerLoading } = useQuery<EmployerProfileData>(GET_EMPLOYER_PROFILE, {
@@ -56,6 +55,77 @@ export default function CreateJobPage() {
 
     // Watch logo field for preview
     const logoUrl = watch("logo");
+
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Client-side validation
+        // 1. Type
+        const validTypes = ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "image/webp"];
+        if (!validTypes.includes(file.type)) {
+            toast.error("Invalid file type. Only JPG, PNG, GIF, SVG, and WEBP are allowed.");
+            return;
+        }
+
+        // 2. Size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("File size exceeds 5MB limit.");
+            return;
+        }
+
+        // 3. Dimensions (Ratio 1:1)
+        const img = new Image();
+        const objectUrl = URL.createObjectURL(file);
+        img.src = objectUrl;
+
+        img.onload = async () => {
+            const width = img.width;
+            const height = img.height;
+            URL.revokeObjectURL(objectUrl);
+
+            // Allow small margin of error for floating point or 1px diff
+            const ratio = width / height;
+            if (ratio < 0.9 || ratio > 1.1) {
+                toast.error("Logo must be square (1:1 ratio). Recommended size: 512x512.");
+                return;
+            }
+
+            // Upload
+            setIsUploading(true);
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const res = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || "Upload failed");
+                }
+
+                const data = await res.json();
+                setValue("logo", data.url, { shouldValidate: true });
+                setValue("logoPublicId", data.public_id);
+                setValue("logoOriginalName", data.original_filename);
+                setValue("logoUploadedAt", data.created_at);
+                toast.success("Logo uploaded successfully!");
+            } catch (error: any) {
+                console.error(error);
+                toast.error(error.message || "Failed to upload logo.");
+            } finally {
+                setIsUploading(false);
+            }
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            toast.error("Invalid image file.");
+        };
+    };
 
     // Auto-select company if only one exists
     useEffect(() => {
@@ -108,6 +178,9 @@ export default function CreateJobPage() {
                         // New fields
                         applyLink: data.applyLink,
                         logo: data.logo,
+                        logoPublicId: data.logoPublicId,
+                        logoOriginalName: data.logoOriginalName,
+                        logoUploadedAt: data.logoUploadedAt ? new Date(data.logoUploadedAt) : null,
                     },
                     employerId: session.user.id,
                     isEmployer: true,
@@ -185,35 +258,52 @@ export default function CreateJobPage() {
                             {/* Job Logo */}
                             <div className="sm:col-span-1">
                                 <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Job Logo</label>
-                                <CldUploadWidget
-                                    uploadPreset="job_portal_preset"
-                                    onSuccess={(result: any) => {
-                                        setValue("logo", result.info.secure_url, { shouldValidate: true });
-                                    }}
-                                >
-                                    {({ open }) => {
-                                        return (
-                                            <div className="flex items-center gap-4">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => open()}
-                                                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-none text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                                >
-                                                    Upload Logo
-                                                </button>
-                                                {logoUrl && (
-                                                    <div className="relative h-10 w-10">
-                                                        <img
-                                                            src={logoUrl}
-                                                            alt="Logo preview"
-                                                            className="h-10 w-10 object-cover rounded-none border border-gray-200"
-                                                        />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    }}
-                                </CldUploadWidget>
+                                <div className="flex items-center gap-4">
+                                    <div className="flex-1">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleLogoUpload}
+                                            disabled={isUploading}
+                                            className="block w-full text-sm text-slate-500
+                                                file:mr-4 file:py-2 file:px-4
+                                                file:rounded-none file:border-0
+                                                file:text-sm file:font-semibold
+                                                file:bg-indigo-50 file:text-indigo-700
+                                                hover:file:bg-indigo-100
+                                                cursor-pointer"
+                                        />
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            Square image (1:1), max 5MB. Formats: JPG, PNG, GIF, SVG.
+                                        </p>
+                                    </div>
+
+                                    {isUploading && (
+                                        <div className="flex items-center">
+                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                                        </div>
+                                    )}
+
+                                    {logoUrl && !isUploading && (
+                                        <div className="relative h-16 w-16 flex-shrink-0">
+                                            <img
+                                                src={logoUrl}
+                                                alt="Logo preview"
+                                                className="h-16 w-16 object-cover rounded-none border border-gray-200"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setValue("logo", "", { shouldValidate: true })}
+                                                className="absolute -top-2 -right-2 bg-red-100 text-red-600 rounded-full p-0.5 hover:bg-red-200"
+                                                title="Remove logo"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                                 {errors.logo && <p className="mt-1 text-sm text-red-600">{errors.logo.message}</p>}
                             </div>
 

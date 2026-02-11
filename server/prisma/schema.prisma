@@ -81,6 +81,9 @@ model Job {
   status       String        @default("active") // active, closed, draft
   salary       String?
   logo         String?       // Company logo (text/emoji or url)
+  logoPublicId String?
+  logoOriginalName String?
+  logoUploadedAt DateTime?
   tags         String[]      @default([]) // Array of tags/keywords
   salaryMin    Int?          // For filtering/sorting
   salaryMax    Int?          // For filtering/sorting

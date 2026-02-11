@@ -65,6 +65,15 @@ export class Job {
     @Field(() => String, { nullable: true })
     logo?: string | null;
 
+    @Field(() => String, { nullable: true })
+    logoPublicId?: string | null;
+
+    @Field(() => String, { nullable: true })
+    logoOriginalName?: string | null;
+
+    @Field(() => Date, { nullable: true })
+    logoUploadedAt?: Date | null;
+
     @Field(() => Int, { nullable: true })
     salaryMin?: number | null;
 

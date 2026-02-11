@@ -21,6 +21,9 @@ export const createJobSchema = z.object({
     // New Fields
     applyLink: z.string().url("Must be a valid URL").optional().or(z.literal("")),
     logo: z.string().optional(),
+    logoPublicId: z.string().optional(),
+    logoOriginalName: z.string().optional(),
+    logoUploadedAt: z.any().optional(), // Can be Date or string
 });
 
 export type CreateJobValues = z.infer<typeof createJobSchema>;
