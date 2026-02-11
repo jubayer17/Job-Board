@@ -5,7 +5,7 @@ import { ApolloProvider } from "@apollo/client/react";
 
 const client = new ApolloClient({
   link: new HttpLink({
-    uri: "http://localhost:4000/graphql",
+    uri: process.env.NEXT_PUBLIC_API_URL || "https://job-board-backend-iota.vercel.app/graphql",
   }),
 
   cache: new InMemoryCache(),
