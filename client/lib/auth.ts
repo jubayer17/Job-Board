@@ -29,7 +29,8 @@ export const authOptions: NextAuthOptions = {
                 const isEmployer = credentials?.isEmployer === "true";
 
                 if (isEmployer) {
-                    const endpoint = process.env.SERVER_GRAPHQL_URL || "https://job-board-backend-iota.vercel.app/graphql";
+                    const endpoint = process.env.SERVER_GRAPHQL_URL || 
+                                   (process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/graphql` : "https://job-board-backend-iota.vercel.app/graphql");
                     const response = await fetch(endpoint, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
