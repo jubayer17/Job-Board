@@ -8,8 +8,8 @@ export class CreateJobInput {
     @Field()
     company: string;
 
-    @Field()
-    location: string;
+    @Field({ nullable: true })
+    location?: string;
 
     @Field()
     type: string;
@@ -61,4 +61,7 @@ export class CreateJobInput {
 
     @Field()
     companyId: string;
+
+    @Field()
+    locationId: string;
 }
