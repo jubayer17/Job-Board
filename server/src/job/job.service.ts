@@ -26,17 +26,46 @@ export class JobService {
             throw new Error('Invalid Company ID or Company does not belong to this employer');
         }
 
-        return this.prisma.job.create({
+        // Handle Location Logic
+        // We need to resolve the location name from the ID if provided.
+        // This ensures we store a human-readable string in the 'location' field for backward compatibility,
+        // while keeping the relation in 'locationId'.
+        let resolvedLocationName = data.location;
+
+        if (data.locationId) {
+            const locationExists = await this.prisma.location.findUnique({
+                where: { id: data.locationId }
+            });
+
+            if (!locationExists) {
+                throw new Error('Invalid Location ID');
+            }
+
+            // Use the standardized name from our database
+            resolvedLocationName = locationExists.name;
+        }
+
+        const job = await this.prisma.job.create({
             data: {
                 ...data,
+                location: resolvedLocationName || '',
                 employerId: userId,
                 status: 'active',
             },
+            include: {
+                locationRelation: true,
+            },
         });
+
+        return job as unknown as Job;
     }
 
     async findAll(): Promise<Job[]> {
-        return this.prisma.job.findMany();
+        return this.prisma.job.findMany({
+            include: {
+                locationRelation: true,
+            },
+        });
     }
 
     async findByEmployer(userId: string): Promise<Job[]> {
@@ -46,6 +75,9 @@ export class JobService {
             },
             orderBy: {
                 postedAt: 'desc',
+            },
+            include: {
+                locationRelation: true,
             },
         });
     }
@@ -57,6 +89,9 @@ export class JobService {
             },
             orderBy: {
                 postedAt: 'desc',
+            },
+            include: {
+                locationRelation: true,
             },
         });
     }
