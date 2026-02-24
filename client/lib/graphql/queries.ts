@@ -6,7 +6,9 @@ export const GET_EMPLOYER_JOBS = gql`
       id
       title
       type
-      location
+      locationRelation {
+        name
+      }
       postedAt
       status
       applicantsCount
@@ -20,7 +22,9 @@ export const GET_EMPLOYER_DASHBOARD_DATA = gql`
       id
       title
       type
-      location
+      locationRelation {
+        name
+      }
       postedAt
       status
       applicantsCount
