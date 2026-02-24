@@ -103,6 +103,21 @@ model Job {
 
   companyId    String
   companyRelation Company  @relation(fields: [companyId], references: [id])
+
+  locationId   String?
+  locationRelation Location? @relation(fields: [locationId], references: [id])
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  name      String   // Display name e.g. "Gulshan, Dhaka"
+  city      String?
+  state     String?
+  country   String   @default("Bangladesh")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jobs      Job[]
 }
 
 model Application {
