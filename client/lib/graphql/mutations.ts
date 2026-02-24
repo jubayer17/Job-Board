@@ -6,7 +6,7 @@ export const CREATE_JOB_MUTATION = gql`
       id
       title
       company
-      location
+      locationId
       type
       description
       salary
