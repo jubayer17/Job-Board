@@ -31,11 +31,11 @@ export default function JobCard({ job, variant = 'default' }: { job: Job; varian
 
             {/* Header */}
             <div className={`flex justify-between items-start mb-6 ${isFeatured ? 'mt-4' : ''}`}>
-                <div className={`h-14 w-14 bg-white border border-gray-200 flex items-center justify-center font-bold text-xl text-gray-900 shadow-sm ${theme.logoBorder} transition-colors overflow-hidden`}>
+                <div className={`h-14 w-14 bg-white border border-gray-200 flex items-center justify-center font-bold text-xl text-gray-900 shadow-sm ${theme.logoBorder} transition-colors overflow-hidden rounded-none`}>
                     {job.logo?.startsWith('http') || job.logo?.startsWith('/') ?
                         <img src={job.logo} alt={job.company} className="w-full h-full object-cover" /> : job.logo || '🏢'}
                 </div>
-                <span className="px-2.5 py-1 border border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wide bg-gray-50">{job.type}</span>
+                <span className="px-2.5 py-1 border border-gray-200 text-xs font-bold text-gray-600 uppercase tracking-wide bg-gray-50 rounded-none">{job.type}</span>
             </div>
 
             {/* Content */}
@@ -68,13 +68,13 @@ export default function JobCard({ job, variant = 'default' }: { job: Job; varian
             <div className="grid grid-cols-2 gap-3 pt-6 border-t border-gray-100">
                 <Link
                     href={`/jobs/${job.id}`}
-                    className="py-2.5 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-widest hover:border-gray-900 hover:text-gray-900 transition-all flex items-center justify-center"
+                    className="py-2.5 border border-gray-200 text-gray-600 text-[10px] font-bold uppercase tracking-widest hover:border-gray-900 hover:text-gray-900 transition-all flex items-center justify-center rounded-none"
                 >
                     View Details
                 </Link>
                 <Link
                     href={`/jobs/${job.id}/apply`}
-                    className="py-2.5 bg-gray-900 border border-gray-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-gray-900 transition-all flex items-center justify-center gap-2"
+                    className="py-2.5 bg-gray-900 border border-gray-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-white hover:text-gray-900 transition-all flex items-center justify-center gap-2 rounded-none"
                 >
                     Apply Now <ArrowRightIcon className="h-3 w-3 hidden group-hover:block" />
                 </Link>
