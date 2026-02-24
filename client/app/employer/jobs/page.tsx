@@ -47,7 +47,7 @@ export default function JobsPage() {
 
     const filteredJobs = jobs.filter((job: any) => {
         const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            job.location.toLowerCase().includes(searchTerm.toLowerCase());
+            job.locationRelation?.name?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = filterStatus === "all" || job.status === filterStatus;
         return matchesSearch && matchesStatus;
     });
@@ -132,7 +132,7 @@ export default function JobsPage() {
                             id={job.id}
                             title={job.title}
                             type={job.type}
-                            location={job.location}
+                            location={job.locationRelation?.name || "Unknown"}
                             postedAt={new Date(job.postedAt).toLocaleDateString()}
                             applicantsCount={job.applicantsCount}
                             status={job.status as 'active' | 'closed' | 'draft'}
