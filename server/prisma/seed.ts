@@ -1,257 +1,122 @@
-import { PrismaClient, User } from '@prisma/client'
-import * as bcrypt from 'bcryptjs'
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-// Define types for our data
-type Employer = {
-  id: string;
-  contactName: string;
-  contactEmail: string;
-  // add other fields if needed for type safety
-};
+const bangladeshLocations = [
+  // Dhaka Division
+  { division: 'Dhaka', district: 'Dhaka', area: 'Gulshan' },
+  { division: 'Dhaka', district: 'Dhaka', area: 'Banani' },
+  { division: 'Dhaka', district: 'Dhaka', area: 'Dhanmondi' },
+  { division: 'Dhaka', district: 'Dhaka', area: 'Mirpur' },
+  { division: 'Dhaka', district: 'Dhaka', area: 'Uttara' },
+  { division: 'Dhaka', district: 'Dhaka', area: 'Mohakhali' },
+  { division: 'Dhaka', district: 'Dhaka', area: 'Farmgate' },
+  { division: 'Dhaka', district: 'Dhaka', area: 'Motijheel' },
+  { division: 'Dhaka', district: 'Dhaka', area: 'Badda' },
+  { division: 'Dhaka', district: 'Dhaka', area: 'Khilkhet' },
+  { division: 'Dhaka', district: 'Gazipur', area: 'Tongi' },
+  { division: 'Dhaka', district: 'Gazipur', area: 'Gazipur Sadar' },
+  { division: 'Dhaka', district: 'Gazipur', area: 'Kaliakair' },
+  { division: 'Dhaka', district: 'Narayanganj', area: 'Narayanganj Sadar' },
+  { division: 'Dhaka', district: 'Narayanganj', area: 'Sonargaon' },
+  { division: 'Dhaka', district: 'Narayanganj', area: 'Rupganj' },
+  { division: 'Dhaka', district: 'Narsingdi', area: 'Narsingdi Sadar' },
+  { division: 'Dhaka', district: 'Tangail', area: 'Tangail Sadar' },
+  { division: 'Dhaka', district: 'Faridpur', area: 'Faridpur Sadar' },
 
-type CompanyWithLogo = {
-  id: string;
-  companyName: string;
-  employerId: string;
-  address: string | null;
-  logo: string;
-  websiteUrl: string | null;
-};
+  // Chattogram Division
+  { division: 'Chattogram', district: 'Chattogram', area: 'Agrabad' },
+  { division: 'Chattogram', district: 'Chattogram', area: 'GEC Circle' },
+  { division: 'Chattogram', district: 'Chattogram', area: 'Nasirabad' },
+  { division: 'Chattogram', district: 'Chattogram', area: 'Halishahar' },
+  { division: 'Chattogram', district: 'Chattogram', area: 'Chawkbazar' },
+  { division: 'Chattogram', district: 'Cox\'s Bazar', area: 'Cox\'s Bazar Sadar' },
+  { division: 'Chattogram', district: 'Cox\'s Bazar', area: 'Teknaf' },
+  { division: 'Chattogram', district: 'Cumilla', area: 'Cumilla Sadar' },
+  { division: 'Chattogram', district: 'Cumilla', area: 'Kandirpar' },
+  { division: 'Chattogram', district: 'Feni', area: 'Feni Sadar' },
+  { division: 'Chattogram', district: 'Noakhali', area: 'Noakhali Sadar' },
+  { division: 'Chattogram', district: 'Brahmanbaria', area: 'Brahmanbaria Sadar' },
 
-const companies = [
-  { name: 'Pathao', logo: 'P', location: 'Gulshan, Dhaka', website: 'https://pathao.com', description: 'Moving Bangladesh Forward. Pathao is the #1 Super App in Bangladesh.' },
-  { name: 'bKash', logo: 'b', location: 'Banani, Dhaka', website: 'https://bkash.com', description: 'bKash is the fastest and safest medium of financial transaction.' },
-  { name: 'ShopUp', logo: 'S', location: 'Mohakhali, Dhaka', website: 'https://shopup.com.bd', description: 'ShopUp is Bangladesh\'s leading full-stack B2B commerce platform.' },
-  { name: 'Grameenphone', logo: 'G', location: 'Bashundhara, Dhaka', website: 'https://grameenphone.com', description: 'Grameenphone is the leading telecommunications service provider in Bangladesh.' },
-  { name: 'Robi', logo: 'R', location: 'Gulshan, Dhaka', website: 'https://robi.com.bd', description: 'Robi Axiata Limited is the second largest mobile network operator in Bangladesh.' },
-  { name: 'Banglalink', logo: 'B', location: 'Gulshan, Dhaka', website: 'https://banglalink.net', description: 'Banglalink is one of the leading digital communications service providers in Bangladesh.' },
-  { name: 'Berger', logo: 'B', location: 'Uttara, Dhaka', website: 'https://bergerbd.com', description: 'Berger Paints Bangladesh Limited is the leading paint company in the country.' },
-  { name: '10 Minute School', logo: '10', location: 'Mohakhali, Dhaka', website: 'https://10minuteschool.com', description: '10 Minute School is the largest online educational platform in Bangladesh.' },
-  { name: 'Chaldal', logo: 'C', location: 'Mirpur, Dhaka', website: 'https://chaldal.com', description: 'Chaldal is the best online grocery shop in Bangladesh.' },
-  { name: 'Brain Station 23', logo: 'B', location: 'Mohakhali, Dhaka', website: 'https://brainstation-23.com', description: 'Brain Station 23 is a global software development company.' },
-  { name: 'Starkwood', logo: 'S', location: 'Gulshan, Dhaka', website: 'https://starkwood.com', description: 'Starkwood is a prominent real estate developer in Bangladesh.' },
-  { name: 'Vivasoft', logo: 'V', location: 'Dhanmondi, Dhaka', website: 'https://vivasoftltd.com', description: 'Vivasoft is a software development company providing offshore development services.' },
-  { name: 'Foodpanda', logo: 'F', location: 'Banani, Dhaka', website: 'https://foodpanda.com.bd', description: 'Order food online from the best restaurants in Bangladesh.' },
-  { name: 'TigerIT', logo: 'T', location: 'Banani, Dhaka', website: 'https://tigerit.com', description: 'TigerIT is a leading software company specializing in biometrics and big data.' },
-  { name: 'Daraz', logo: 'D', location: 'Banani, Dhaka', website: 'https://daraz.com.bd', description: 'Daraz is the leading online marketplace in South Asia.' },
-  { name: 'Selise', logo: 'S', location: 'Dhanmondi, Dhaka', website: 'https://selise.ch', description: 'SELISE is a Swiss software development firm with a major delivery center in Dhaka.' }
-];
+  // Sylhet Division
+  { division: 'Sylhet', district: 'Sylhet', area: 'Zindabazar' },
+  { division: 'Sylhet', district: 'Sylhet', area: 'Amberkhana' },
+  { division: 'Sylhet', district: 'Sylhet', area: 'Shahjalal Uposohor' },
+  { division: 'Sylhet', district: 'Moulvibazar', area: 'Srimangal' },
+  { division: 'Sylhet', district: 'Moulvibazar', area: 'Moulvibazar Sadar' },
+  { division: 'Sylhet', district: 'Habiganj', area: 'Habiganj Sadar' },
+  { division: 'Sylhet', district: 'Sunamganj', area: 'Sunamganj Sadar' },
 
-const roles = [
-  { title: 'Senior Frontend Developer', tags: ['React', 'Next.js', 'TypeScript'], salary: '120k - 180k BDT', min: 120000, max: 180000 },
-  { title: 'Product Designer (UI/UX)', tags: ['Figma', 'Prototyping', 'User Research'], salary: '80k - 120k BDT', min: 80000, max: 120000 },
-  { title: 'Backend Engineer (Go)', tags: ['Go', 'Microservices', 'AWS'], salary: '150k - 200k BDT', min: 150000, max: 200000 },
-  { title: 'Marketing Manager', tags: ['Marketing', 'Strategy', 'B2B'], salary: 'Negotiable', min: 0, max: 0 },
-  { title: 'Data Scientist', tags: ['Python', 'ML', 'Data Analysis'], salary: '100k - 150k BDT', min: 100000, max: 150000 },
-  { title: 'DevOps Engineer', tags: ['Docker', 'Kubernetes', 'CI/CD'], salary: '140k - 200k BDT', min: 140000, max: 200000 },
-  { title: 'HR Specialist', tags: ['Recruitment', 'Employee Relations'], salary: '50k - 80k BDT', min: 50000, max: 80000 },
-  { title: 'Content Writer', tags: ['Content Marketing', 'SEO', 'Copywriting'], salary: '20k - 40k BDT', min: 20000, max: 40000 },
-  { title: 'Sales Executive', tags: ['Sales', 'Negotiation', 'CRM'], salary: '30k - 50k BDT', min: 30000, max: 50000 },
-  { title: 'Lead Software Engineer', tags: ['Java', 'Spring Boot', 'Microservices'], salary: '250k - 350k BDT', min: 250000, max: 350000 },
-  { title: 'CTO', tags: ['Leadership', 'Architecture', 'Strategy'], salary: '400k - 600k BDT', min: 400000, max: 600000 },
-  { title: 'Principal Product Manager', tags: ['Product Strategy', 'Agile', 'Data Driven'], salary: '300k - 450k BDT', min: 300000, max: 450000 }
-];
+  // Rajshahi Division
+  { division: 'Rajshahi', district: 'Rajshahi', area: 'Shaheb Bazar' },
+  { division: 'Rajshahi', district: 'Rajshahi', area: 'Motihar' },
+  { division: 'Rajshahi', district: 'Bogura', area: 'Bogura Sadar' },
+  { division: 'Rajshahi', district: 'Bogura', area: 'Sherpur' },
+  { division: 'Rajshahi', district: 'Pabna', area: 'Pabna Sadar' },
+  { division: 'Rajshahi', district: 'Pabna', area: 'Ishwardi' },
+  { division: 'Rajshahi', district: 'Sirajganj', area: 'Sirajganj Sadar' },
 
-const types = ['Full-time', 'Part-time', 'Contract', 'Remote'];
+  // Khulna Division
+  { division: 'Khulna', district: 'Khulna', area: 'Shibbari' },
+  { division: 'Khulna', district: 'Khulna', area: 'Sonadanga' },
+  { division: 'Khulna', district: 'Khulna', area: 'Khalishpur' },
+  { division: 'Khulna', district: 'Jashore', area: 'Jashore Sadar' },
+  { division: 'Khulna', district: 'Kushtia', area: 'Kushtia Sadar' },
+  { division: 'Khulna', district: 'Satkhira', area: 'Satkhira Sadar' },
 
-const employers = [
-  { name: 'Rahat Ahmed', email: 'rahat.ahmed@example.com', designation: 'Head of HR' },
-  { name: 'Farhana Rahman', email: 'farhana.rahman@example.com', designation: 'Talent Acquisition Lead' },
-  { name: 'Tanvir Islam', email: 'tanvir.islam@example.com', designation: 'Recruitment Manager' },
-  { name: 'Nabila Huda', email: 'nabila.huda@example.com', designation: 'HR Business Partner' }
+  // Barishal Division
+  { division: 'Barishal', district: 'Barishal', area: 'Sadar Road' },
+  { division: 'Barishal', district: 'Barishal', area: 'Rupatoli' },
+  { division: 'Barishal', district: 'Bhola', area: 'Bhola Sadar' },
+  { division: 'Barishal', district: 'Patuakhali', area: 'Patuakhali Sadar' },
+
+  // Rangpur Division
+  { division: 'Rangpur', district: 'Rangpur', area: 'Jahaj Company Mor' },
+  { division: 'Rangpur', district: 'Rangpur', area: 'Dhap' },
+  { division: 'Rangpur', district: 'Dinajpur', area: 'Dinajpur Sadar' },
+  { division: 'Rangpur', district: 'Saidpur', area: 'Saidpur' },
+
+  // Mymensingh Division
+  { division: 'Mymensingh', district: 'Mymensingh', area: 'Ganginarpar' },
+  { division: 'Mymensingh', district: 'Mymensingh', area: 'Charpara' },
+  { division: 'Mymensingh', district: 'Jamalpur', area: 'Jamalpur Sadar' },
 ];
 
 async function main() {
-  console.log('Start seeding ...')
+  console.log('Seeding locations...');
 
-  // Password for all employers
-  const hashedPassword = await bcrypt.hash('password123', 10);
-
-  const createdEmployers: Employer[] = [];
-
-  // Create Employers
-  for (const emp of employers) {
-    const employer = await prisma.employer.upsert({
-      where: { contactEmail: emp.email },
-      update: {},
-      create: {
-        contactName: emp.name,
-        contactDesignation: emp.designation,
-        contactEmail: emp.email,
-        contactMobile: '01700000000',
-        password: hashedPassword,
-      },
-    });
-    createdEmployers.push(employer as unknown as Employer);
-    console.log(`Created/Found employer: ${employer.contactName}`);
-  }
-
-  // Create Companies and assign to random employers
-  const createdCompanies: CompanyWithLogo[] = [];
-  for (const companyInfo of companies) {
-    const randomEmployer = createdEmployers[Math.floor(Math.random() * createdEmployers.length)];
-
-    let company = await prisma.company.findFirst({
-      where: { companyName: companyInfo.name, employerId: randomEmployer.id }
+  for (const loc of bangladeshLocations) {
+    // Check if exists based on name (Area) + city (District) to avoid duplicates
+    const exists = await prisma.location.findFirst({
+      where: {
+        name: loc.area,
+        city: loc.district,
+        state: loc.division
+      }
     });
 
-    if (!company) {
-      company = await prisma.company.create({
+    if (!exists) {
+      await prisma.location.create({
         data: {
-          companyName: companyInfo.name,
-          employerId: randomEmployer.id,
-          address: companyInfo.location,
-          websiteUrl: companyInfo.website,
-          description: companyInfo.description,
-          industryType: 'Technology',
-          tradeLicense: `TRD-${Math.floor(Math.random() * 100000)}`,
-          yearOfEstablishment: `${2000 + Math.floor(Math.random() * 23)}`
+          name: loc.area,       // Area -> name
+          city: loc.district,   // District -> city
+          state: loc.division,  // Division -> state
+          country: 'Bangladesh',
+          isActive: true
         }
       });
-    }
-    createdCompanies.push({ ...company, logo: companyInfo.logo });
-    console.log(`Created/Found company: ${company.companyName} for employer ${randomEmployer.contactName}`);
-  }
-
-  // Generate 30 jobs
-  for (let i = 0; i < 30; i++) {
-    const companyData = createdCompanies[Math.floor(Math.random() * createdCompanies.length)];
-    const role = roles[Math.floor(Math.random() * roles.length)];
-    const type = types[Math.floor(Math.random() * types.length)];
-
-    // Random date within last 30 days
-    const daysAgo = Math.floor(Math.random() * 30);
-    const postedAt = new Date();
-    postedAt.setDate(postedAt.getDate() - daysAgo);
-
-    // Deadline 30 days after posting
-    const deadline = new Date(postedAt);
-    deadline.setDate(deadline.getDate() + 30);
-
-    const job = await prisma.job.create({
-      data: {
-        title: role.title,
-        location: companyData.address || 'Dhaka',
-        type: type,
-        description: `We are looking for a talented ${role.title} to join our team at ${companyData.companyName}.
-        
-Key Responsibilities:
-- Work with cross-functional teams to design, build, and roll out products that deliver the company's vision and strategy.
-- Develop and maintain clean, efficient code.
-- Troubleshoot and debug applications.
-- Collaborate with other developers to improve code quality.
-
-Requirements:
-- Proven experience as a ${role.title} or similar role.
-- Strong knowledge of ${role.tags.join(', ')}.
-- Excellent communication and teamwork skills.
-- Degree in Computer Science, Engineering or a related field is a plus.
-
-Benefits:
-- Competitive salary and performance bonuses.
-- Health insurance and wellness programs.
-- Flexible working hours and remote work options.
-- Professional development opportunities.`,
-        salary: role.salary,
-        logo: companyData.logo,
-        tags: role.tags,
-        salaryMin: role.min,
-        salaryMax: role.max,
-        postedAt: postedAt,
-        deadline: deadline,
-        vacancies: Math.floor(Math.random() * 5) + 1,
-        experience: '1 to 3 years',
-        education: 'Bachelor of Science (BSc) in Computer Science & Engineering',
-        workplace: Math.random() > 0.5 ? 'Work at office' : 'Hybrid',
-        jobContext: 'We are a fast-growing team looking for passionate individuals.',
-        gender: 'Both',
-        employerId: companyData.employerId,
-        companyId: companyData.id,
-        company: companyData.companyName,
-        applyLink: companyData.websiteUrl ? `${companyData.websiteUrl}/careers` : '',
-        status: 'active',
-      },
-    })
-    console.log(`Created job: ${job.title} at ${job.company}`)
-  }
-
-  console.log('Seeding finished.')
-
-  // Create Users (Candidates)
-  const users = [
-    { name: 'Sadiqul Islam', email: 'sadiqul.islam@example.com', title: 'Frontend Developer' },
-    { name: 'Maria Hossain', email: 'maria.hossain@example.com', title: 'Product Designer' },
-    { name: 'Rafiqul Islam', email: 'rafiqul.islam@example.com', title: 'Backend Developer' },
-    { name: 'Tasnim Ahmed', email: 'tasnim.ahmed@example.com', title: 'Data Analyst' },
-    { name: 'Zarif Hasan', email: 'zarif.hasan@example.com', title: 'DevOps Engineer' }
-  ];
-
-  const createdUsers: User[] = [];
-  for (const u of users) {
-    const user = await prisma.user.upsert({
-      where: { email: u.email },
-      update: {},
-      create: {
-        name: u.name,
-        email: u.email,
-        password: hashedPassword,
-        // Removed bio and role as they don't exist in User schema
-      },
-    });
-    createdUsers.push(user);
-    console.log(`Created/Found user: ${user.name}`);
-  }
-
-  // Create Applications
-  // Get all jobs to apply to
-  const allJobs = await prisma.job.findMany();
-
-  if (allJobs.length > 0 && createdUsers.length > 0) {
-    console.log('Creating applications...');
-
-    for (const user of createdUsers) {
-      // Each user applies to 3-5 random jobs
-      const applicationCount = 3 + Math.floor(Math.random() * 3);
-
-      // Shuffle jobs to pick random ones
-      const shuffledJobs = [...allJobs].sort(() => 0.5 - Math.random());
-      const jobsToApply = shuffledJobs.slice(0, applicationCount);
-
-      for (const job of jobsToApply) {
-        // Check if already applied
-        const existingApplication = await prisma.application.findFirst({
-          where: {
-            jobId: job.id,
-            userId: user.id
-          }
-        });
-
-        if (!existingApplication) {
-          await prisma.application.create({
-            data: {
-              jobId: job.id,
-              userId: user.id,
-              status: ['PENDING', 'REVIEWED', 'INTERVIEWED'][Math.floor(Math.random() * 3)],
-              // Removed coverLetter as it doesn't exist in Application schema
-            }
-          });
-          console.log(`User ${user.name} applied to ${job.title} at ${job.company}`);
-        }
-      }
+      console.log(`Created: ${loc.area}, ${loc.district}, ${loc.division}`);
+    } else {
+      console.log(`Skipped (Exists): ${loc.area}, ${loc.district}`);
     }
   }
-
-  console.log('Applications seeded.');
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
   })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
