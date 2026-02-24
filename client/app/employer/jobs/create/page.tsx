@@ -11,6 +11,7 @@ import { GET_EMPLOYER_PROFILE } from "@/lib/graphql/queries";
 import { createJobSchema, CreateJobValues } from "@/lib/schemas/job-schema";
 import { useEffect, useState } from "react";
 import RichTextEditor from "@/components/ui/RichTextEditor";
+import LocationDropdown from "@/components/LocationDropdown";
 
 interface EmployerProfileData {
     employer: {
@@ -50,6 +51,7 @@ export default function CreateJobPage() {
             workplace: "Work at office",
             type: "Full-time",
             tags: "",
+            locationId: "", // Initialize as empty string to keep React happy
         }
     });
 
@@ -161,7 +163,7 @@ export default function CreateJobPage() {
                         title: data.title,
                         company: selectedCompany.companyName,
                         companyId: data.companyId,
-                        location: data.location,
+                        locationId: data.locationId,
                         type: data.type,
                         description: data.description,
                         salary: data.salary,
@@ -307,18 +309,6 @@ export default function CreateJobPage() {
                                 {errors.logo && <p className="mt-1 text-sm text-red-600">{errors.logo.message}</p>}
                             </div>
 
-                            {/* Location */}
-                            <div className="sm:col-span-1">
-                                <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Location</label>
-                                <input
-                                    type="text"
-                                    {...register("location")}
-                                    className="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-none shadow-sm text-sm py-3"
-                                    placeholder="e.g. Dhaka, Bangladesh"
-                                />
-                                {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location.message}</p>}
-                            </div>
-
                             {/* Workplace */}
                             <div className="sm:col-span-1">
                                 <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">Workplace</label>
@@ -331,6 +321,27 @@ export default function CreateJobPage() {
                                     <option value="Remote">Remote</option>
                                     <option value="Hybrid">Hybrid</option>
                                 </select>
+                            </div>
+
+                            {/* Location - Full Width for better visibility */}
+                            <div className="sm:col-span-2">
+                                <label className="block text-sm font-bold text-gray-700 uppercase tracking-wide mb-2">
+                                    Location <span className="text-red-500">*</span>
+                                </label>
+                                <p className="text-xs text-gray-500 mb-2">
+                                    Select the primary location for this role.
+                                </p>
+                                <Controller
+                                    control={control}
+                                    name="locationId"
+                                    render={({ field }) => (
+                                        <LocationDropdown
+                                            value={field.value}
+                                            onChange={(val) => field.onChange(val)}
+                                            error={errors.locationId?.message}
+                                        />
+                                    )}
+                                />
                             </div>
                         </div>
                     </div>
