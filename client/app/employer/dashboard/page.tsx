@@ -19,7 +19,9 @@ interface EmployerJob {
   id: string;
   title: string;
   type: string;
-  location: string;
+  locationRelation?: {
+    name?: string;
+  };
   postedAt: string;
   status: 'active' | 'closed' | 'draft';
   applicantsCount: number;
@@ -149,7 +151,7 @@ export default function EmployerDashboard() {
                 id={job.id}
                 title={job.title}
                 type={job.type}
-                location={job.location}
+                location={job.locationRelation?.name || "Unknown"}
                 postedAt={`${formatDistanceToNow(new Date(job.postedAt))} ago`}
                 applicantsCount={job.applicantsCount}
                 status={job.status}
