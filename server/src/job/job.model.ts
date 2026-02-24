@@ -1,4 +1,5 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { Location } from '../location/location.model';
 
 @ObjectType()
 export class Job {
@@ -11,8 +12,11 @@ export class Job {
     @Field(() => String)
     company: string;
 
-    @Field(() => String)
-    location: string;
+    @Field(() => String, { nullable: true })
+    locationId?: string | null;
+
+    @Field(() => Location, { nullable: true })
+    locationRelation?: Location | null;
 
     @Field(() => String)
     type: string;
