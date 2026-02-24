@@ -36,8 +36,8 @@ export default function LocationDropdown({ value, onChange, error }: LocationDro
     useEffect(() => {
         const fetchLocations = async () => {
             try {
-                // Use env variable or fallback to localhost
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+                // Use env variable or fallback to hosted backend
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://job-board-backend-iota.vercel.app";
                 const res = await fetch(`${apiUrl}/api/locations`);
 
                 if (!res.ok) {
