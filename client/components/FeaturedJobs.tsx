@@ -98,7 +98,7 @@ export default function FeaturedJobs() {
                 </div>
 
                 {/* 3x3 Grid Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {sortedJobs.map((job: Job) => (
                         <JobCard
                             variant="featured"
