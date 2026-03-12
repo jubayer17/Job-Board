@@ -1,8 +1,10 @@
 import React from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { getJobs, getUniqueLocations } from "@/lib/services/job";
 import JobFilters from "./job-filters";
+import SearchedJobCard from "@/components/SearchedJobCard";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -22,109 +24,84 @@ export default async function JobsPage(props: { searchParams: SearchParams }) {
     ]);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            {/* Header */}
-            <div className="md:flex md:items-center md:justify-between mb-8">
-                <div className="min-w-0 flex-1">
-                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">
-                        Available Jobs
-                    </h2>
-                    <p className="mt-1 text-gray-500">
-                        Browse the latest opportunities from top companies.
-                    </p>
-                </div>
-                <div className="mt-4 flex md:ml-4 md:mt-0">
-                    <Link
-                        href="/jobs/post"
-                        className="ml-3 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
-                    >
-                        Post a Job
-                    </Link>
-                </div>
-            </div>
-
-            {/* Client Component for Filtering */}
-            <JobFilters locations={locations} />
-
-            {/* Server Rendered Job List */}
-            <div className="space-y-4">
-                {jobs.length === 0 ? (
-                    <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <svg
-                            className="mx-auto h-12 w-12 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                vectorEffect="non-scaling-stroke"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
-                            />
-                        </svg>
-                        <h3 className="mt-2 text-sm font-semibold text-gray-900">No jobs found</h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                            Try adjusting your search or filters.
+        <div className="bg-gray-50 min-h-screen">
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 border-b border-gray-200 pb-8 relative">
+                    <div className="relative">
+                        <h2 className="text-4xl font-black tracking-tighter text-gray-900 uppercase">
+                            Searched <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Jobs</span>
+                        </h2>
+                        <div className="flex items-center gap-2 mt-4">
+                            <div className="h-1 w-12 bg-indigo-600"></div>
+                            <div className="h-1 w-2 bg-gray-300"></div>
+                            <div className="h-1 w-2 bg-gray-300"></div>
+                        </div>
+                        <p className="mt-4 text-lg text-gray-600 font-medium max-w-xl">
+                            Discover your next career move with our curated selection.
                         </p>
                     </div>
-                ) : (
-                    jobs.map((job) => (
-                        <Link
-                            key={job.id}
-                            href={`/jobs/${job.id}`}
-                            className="block bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200"
-                        >
-                            <div className="p-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-4">
-                                        <div className="h-12 w-12 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-xl">
-                                            {job.company.charAt(0)}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                                                {job.title}
-                                            </h3>
-                                            <p className="text-sm text-gray-500">{job.company}</p>
-                                        </div>
-                                    </div>
-                                    {job.salary && (
-                                        <div className="hidden md:block">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                {job.salary}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
-                                    <div className="flex space-x-4">
-                                        <div className="flex items-center">
-                                            <svg className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                                            </svg>
-                                            {job.location}
-                                        </div>
-                                        <div className="flex items-center">
-                                            <svg className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clipRule="evenodd" />
-                                                <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z" />
-                                            </svg>
-                                            {job.type}
-                                        </div>
-                                        <div className="flex items-center">
-                                            <svg className="mr-1.5 h-4 w-4 flex-shrink-0 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                                            </svg>
-                                            {formatDistanceToNow(new Date(job.postedAt), { addSuffix: true })}
-                                        </div>
-                                    </div>
-                                </div>
+                    <Link
+                        href="/jobs/post"
+                        className="group inline-flex items-center justify-center px-8 py-4 bg-gray-900 text-white text-sm font-bold uppercase tracking-widest hover:bg-indigo-600 transition-all duration-300 shadow-sm rounded-lg"
+                    >
+                        Post a Job
+                        <ArrowRightIcon className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Link>
+                </div>
+
+                {/* Client Component for Filtering */}
+                <div className="mb-12">
+                    <JobFilters locations={locations} />
+                </div>
+
+                {/* Server Rendered Job Grid */}
+                <div className="mt-8">
+                    {jobs.length === 0 ? (
+                        <div className="text-center py-20 bg-white border border-gray-200 rounded-2xl shadow-sm">
+                            <div className="bg-gray-50 w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6">
+                                <svg
+                                    className="h-10 w-10 text-gray-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        vectorEffect="non-scaling-stroke"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                    />
+                                </svg>
                             </div>
-                        </Link>
-                    ))
-                )}
+                            <h3 className="text-xl font-bold text-gray-900">No jobs found</h3>
+                            <p className="mt-2 text-gray-500 max-w-sm mx-auto">
+                                We couldn't find any matches for your search. Try adjusting your filters or keywords.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {jobs.map((job) => (
+                                <SearchedJobCard
+                                    key={job.id}
+                                    job={{
+                                        id: job.id,
+                                        title: job.title,
+                                        company: job.company,
+                                        location: job.location,
+                                        type: job.type,
+                                        salary: job.salary || "Negotiable",
+                                        logo: job.logo || "",
+                                        tags: job.tags,
+                                        posted: formatDistanceToNow(new Date(job.postedAt), { addSuffix: true })
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
