@@ -120,4 +120,30 @@ export class JobService {
             avgTimeToHire: '14 days' // Mock data for now
         };
     }
+
+    async toggleSavedJob(jobId: string, userId: string): Promise<boolean> {
+        const existing = await this.prisma.savedJob.findUnique({
+            where: {
+                userId_jobId: {
+                    userId,
+                    jobId
+                }
+            }
+        });
+
+        if (existing) {
+            await this.prisma.savedJob.delete({
+                where: { id: existing.id }
+            });
+            return false;
+        } else {
+            await this.prisma.savedJob.create({
+                data: {
+                    userId,
+                    jobId
+                }
+            });
+            return true;
+        }
+    }
 }
