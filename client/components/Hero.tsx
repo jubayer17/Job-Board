@@ -1,27 +1,29 @@
 "use client"
 
-import React from "react"
-import { MagnifyingGlassIcon, MapPinIcon } from "@heroicons/react/24/outline"
+import React, { useState } from "react"
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import TrustedCompanies from "./TrustedCompanies"
-
-// Subcomponents
-const Blob = ({ className }: { className: string }) => (
-    <div className={`absolute w-96 h-96 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob ${className}`} />
-);
-
-const SearchInput = ({ icon: Icon, placeholder, className = "" }: { icon: any, placeholder: string, className?: string }) => (
-    <div className={`flex-1 flex items-center px-6 h-16 bg-white/50 ${className}`}>
-        <Icon className="h-5 w-5 text-gray-400 mr-4" />
-        <input 
-            type="text" 
-            placeholder={placeholder} 
-            className="w-full bg-transparent border-none focus:ring-0 text-gray-900 placeholder-gray-400 text-sm font-medium uppercase tracking-wide" 
-        />
-    </div>
-);
+import { Blob } from "./hero/Blob"
+import { SearchInput } from "./hero/SearchInput"
+import LocationDropdown from "./LocationDropdown"
 
 export default function Hero() {
+    const router = useRouter();
+    const [search, setSearch] = useState("");
+    const [locationId, setLocationId] = useState("");
+    const [locationName, setLocationName] = useState("");
+
+    const handleSearch = () => {
+        const params = new URLSearchParams();
+        if (search) params.append("search", search);
+        // Use location name for filtering if available, as backend filters by location string
+        if (locationName) params.append("location", locationName);
+
+        router.push(`/jobs?${params.toString()}`);
+    };
+
     return (
         <div className="relative bg-white pt-32 pb-24 lg:pt-52 lg:pb-40 overflow-hidden">
             {/* Background Effects */}
@@ -29,7 +31,7 @@ export default function Hero() {
                 <Blob className="top-0 left-1/4 bg-indigo-200" />
                 <Blob className="top-0 right-1/4 bg-purple-200 animation-delay-2000" />
                 <Blob className="-bottom-32 left-1/3 bg-slate-300 animation-delay-4000" />
-                <div 
+                <div
                     className="absolute inset-0 opacity-[0.03]"
                     style={{
                         backgroundImage: `linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)`,
@@ -56,24 +58,35 @@ export default function Hero() {
                 </p>
 
                 {/* Search Interface */}
-                <div className="max-w-4xl mx-auto">
-                    <div className="bg-white/80 backdrop-blur-md p-3 border border-gray-200 shadow-xl shadow-indigo-100/50">
+                <div className="max-w-5xl mx-auto">
+                    <div className="bg-white/80 backdrop-blur-md p-1 border border-gray-200 shadow-xl shadow-indigo-100/50">
                         <div className="flex flex-col md:flex-row gap-0">
-                            <SearchInput 
-                                icon={MagnifyingGlassIcon} 
-                                placeholder="JOB TITLE, KEYWORDS..." 
-                                className="border-b md:border-b-0 md:border-r border-gray-200" 
+                            <SearchInput
+                                icon={MagnifyingGlassIcon}
+                                placeholder="JOB TITLE, KEYWORDS..."
+                                className="border-b md:border-b-0 md:border-r border-gray-200"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
                             />
-                            <SearchInput 
-                                icon={MapPinIcon} 
-                                placeholder="LOCATION" 
+
+                            <LocationDropdown
+                                value={locationId}
+                                onChange={(val, loc) => {
+                                    setLocationId(val);
+                                    if (loc) setLocationName(loc.name);
+                                    else setLocationName("");
+                                }}
+                                className="flex flex-col md:flex-row gap-0 flex-[2] bg-white/50 items-center px-2 border-b md:border-b-0 md:border-r border-gray-200"
+                                triggerClassName="w-full bg-transparent border-none focus:ring-0 focus:outline-none focus-visible:ring-0 text-gray-900 text-sm font-medium uppercase tracking-wide h-14 md:h-16 px-2 shadow-none"
+                                showLabels={false}
                             />
-                            <Link 
-                                href="/jobs" 
-                                className="h-16 px-12 flex items-center justify-center bg-gray-900 hover:bg-black text-white text-sm font-bold uppercase tracking-widest transition-all hover:shadow-lg"
+
+                            <button
+                                onClick={handleSearch}
+                                className="h-16 px-12 flex items-center justify-center bg-gray-900 hover:bg-black text-white text-sm font-bold uppercase tracking-widest transition-all hover:shadow-lg focus:outline-none focus:ring-0 active:outline-none focus-visible:outline-none"
                             >
                                 Search
-                            </Link>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -82,9 +95,9 @@ export default function Hero() {
                 <div className="mt-10 flex flex-wrap justify-center gap-4 text-xs font-medium uppercase tracking-wide text-gray-500">
                     <span>Popular:</span>
                     {['Frontend Developer', 'Product Manager', 'Data Analyst', 'Remote'].map((tag) => (
-                        <Link 
-                            key={tag} 
-                            href={`/jobs?q=${tag}`} 
+                        <Link
+                            key={tag}
+                            href={`/jobs?q=${tag}`}
                             className="hover:text-gray-900 transition-colors border-b border-gray-300 hover:border-gray-900 pb-0.5"
                         >
                             {tag}
