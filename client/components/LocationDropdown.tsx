@@ -8,6 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { logger } from "@/lib/logger";
 
 interface Location {
     id: string;
@@ -21,12 +22,23 @@ interface LocationDropdownProps {
     value?: string;
     onChange: (value: string, locationObject?: Location) => void;
     error?: string;
+    className?: string;
+    triggerClassName?: string;
+    showLabels?: boolean;
 }
 
-export default function LocationDropdown({ value, onChange, error }: LocationDropdownProps) {
+export default function LocationDropdown({
+    value,
+    onChange,
+    error,
+    className = "grid grid-cols-1 md:grid-cols-3 gap-4",
+    triggerClassName = "w-full rounded-none h-11 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500",
+    showLabels = true
+}: LocationDropdownProps) {
     const [locations, setLocations] = useState<Location[]>([]);
     const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState<string | null>(null);
+    const [retryCount, setRetryCount] = useState(0);
 
     // Internal state for cascading dropdowns
     const [selectedDivision, setSelectedDivision] = useState<string>("");
@@ -34,34 +46,60 @@ export default function LocationDropdown({ value, onChange, error }: LocationDro
 
     // Fetch locations on mount
     useEffect(() => {
+        let isMounted = true;
+        let attempts = 0;
+        const maxAttempts = 3;
+
         const fetchLocations = async () => {
-            try {
-                // Use env variable or fallback to hosted backend
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://job-board-backend-iota.vercel.app";
-                const res = await fetch(`${apiUrl}/api/locations`);
+            setLoading(true);
+            setFetchError(null);
 
-                if (!res.ok) {
-                    throw new Error(`Failed to fetch: ${res.statusText}`);
+            while (attempts < maxAttempts) {
+                try {
+                    // Use env variable or fallback to localhost
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+                    const res = await fetch(`${apiUrl}/api/locations`);
+
+                    if (!res.ok) {
+                        throw new Error(`Failed to fetch: ${res.statusText}`);
+                    }
+
+                    const data = await res.json();
+
+                    if (isMounted) {
+                        if (Array.isArray(data)) {
+                            setLocations(data);
+                            setFetchError(null);
+                        } else {
+                            logger.error("API returned weird data:", { data });
+                            setLocations([]);
+                            setFetchError("Invalid data received from server.");
+                        }
+                        setLoading(false);
+                        return; // Success, exit loop
+                    }
+                } catch (err) {
+                    attempts++;
+                    logger.error(`Location fetch attempt ${attempts} failed:`, { error: err });
+                    if (attempts >= maxAttempts && isMounted) {
+                        setFetchError("Could not load locations. Please check your connection.");
+                        setLoading(false);
+                    } else {
+                        // Exponential backoff: 1s, 2s, 4s...
+                        await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts - 1)));
+                    }
                 }
-
-                const data = await res.json();
-
-                if (Array.isArray(data)) {
-                    setLocations(data);
-                } else {
-                    console.error("API returned weird data:", data);
-                    setLocations([]);
-                }
-            } catch (err) {
-                console.error("Location fetch error:", err);
-                setFetchError("Could not load locations. Please try refreshing.");
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchLocations();
-    }, []);
+
+        return () => { isMounted = false; };
+    }, [retryCount]);
+
+    const handleRetry = () => {
+        setRetryCount(prev => prev + 1);
+    };
 
     // Sync internal state when external value changes (e.g. edit mode or initial load)
     useEffect(() => {
@@ -120,7 +158,17 @@ export default function LocationDropdown({ value, onChange, error }: LocationDro
     }
 
     if (fetchError) {
-        return <div className="text-sm text-red-500">{fetchError}</div>;
+        return (
+            <div className="flex flex-col items-start gap-2">
+                <div className="text-sm text-red-500">{fetchError}</div>
+                <button
+                    onClick={handleRetry}
+                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 underline"
+                >
+                    Retry
+                </button>
+            </div>
+        );
     }
 
     if (locations.length === 0) {
@@ -128,13 +176,13 @@ export default function LocationDropdown({ value, onChange, error }: LocationDro
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className={className}>
             {/* Division Select */}
-            <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Division</label>
+            <div className="w-full flex-1">
+                {showLabels && <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Division</label>}
                 <Select value={selectedDivision} onValueChange={handleDivisionChange}>
-                    <SelectTrigger className="w-full rounded-none h-11 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
-                        <SelectValue placeholder="Select Division" />
+                    <SelectTrigger className={triggerClassName}>
+                        <SelectValue placeholder="Division" />
                     </SelectTrigger>
                     <SelectContent>
                         {divisions.map((div) => (
@@ -147,15 +195,15 @@ export default function LocationDropdown({ value, onChange, error }: LocationDro
             </div>
 
             {/* District Select */}
-            <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">District</label>
+            <div className="w-full flex-1">
+                {showLabels && <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">District</label>}
                 <Select
                     value={selectedDistrict}
                     onValueChange={handleDistrictChange}
                     disabled={!selectedDivision}
                 >
-                    <SelectTrigger className="w-full rounded-none h-11 border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100">
-                        <SelectValue placeholder="Select District" />
+                    <SelectTrigger className={`${triggerClassName} ${!selectedDivision ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <SelectValue placeholder="District" />
                     </SelectTrigger>
                     <SelectContent>
                         {districts.map((dist) => (
@@ -168,15 +216,15 @@ export default function LocationDropdown({ value, onChange, error }: LocationDro
             </div>
 
             {/* Area Select (Final Value) */}
-            <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Area</label>
+            <div className="w-full flex-1">
+                {showLabels && <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Area</label>}
                 <Select
                     value={value || ""}
                     onValueChange={handleAreaChange}
                     disabled={!selectedDistrict}
                 >
-                    <SelectTrigger className={`w-full rounded-none h-11 ${error ? "border-red-500" : "border-gray-300"} focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100`}>
-                        <SelectValue placeholder="Select Area" />
+                    <SelectTrigger className={`${triggerClassName} ${error ? "border-red-500" : ""} ${!selectedDistrict ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <SelectValue placeholder="Area" />
                     </SelectTrigger>
                     <SelectContent className="max-h-60">
                         {areas.length === 0 && (
