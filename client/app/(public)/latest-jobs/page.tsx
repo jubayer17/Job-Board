@@ -36,7 +36,7 @@ export default async function LatestJobsPage(props: { searchParams: SearchParams
                     <div className="absolute top-20 -left-20 w-60 h-60 rounded-full bg-indigo-100 blur-3xl opacity-50"></div>
                 </div>
 
-                <div className="container mx-auto px-4 relative z-10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="max-w-3xl">
                         <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
                             Latest <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Opportunities</span>
@@ -49,7 +49,7 @@ export default async function LatestJobsPage(props: { searchParams: SearchParams
                 </div>
             </section>
 
-            <div className="container mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Search Filters */}
                 <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse rounded-lg mb-10"></div>}>
                     <SearchFilters />
