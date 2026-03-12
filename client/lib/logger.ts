@@ -1,6 +1,3 @@
-// A simple logging utility for consistent logging across the application.
-// In a production environment, this could be extended to send logs to a service like Sentry or LogRocket.
-
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
 interface LogEntry {
@@ -35,7 +32,6 @@ class Logger {
   }
 
   private print(entry: LogEntry) {
-    // In production, we might want to suppress debug/info logs or send them to a service
     if (this.isProduction && entry.level === 'debug') {
       return;
     }
