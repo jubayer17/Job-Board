@@ -58,6 +58,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   applications  Application[]
+  savedJobs     SavedJob[]
   isHR          Boolean       @default(false)
 }
 
@@ -96,10 +97,17 @@ model Job {
   jobContext   String?       @db.Text
   gender       String?       @default("Both") // Male, Female, Both
   
+  // New fields for comprehensive job details
+  benefits         String[]  @default([])
+  responsibilities String?   @db.Text
+  skills           String[]  @default([])
+  level            String?   // Entry, Mid, Senior, Executive
+
   employer     Employer     @relation(fields: [employerId], references: [id])
   employerId   String
 
   applications Application[]
+  savedBy      SavedJob[]
 
   companyId    String
   companyRelation Company  @relation(fields: [companyId], references: [id])
@@ -169,6 +177,26 @@ model Company {
   jobs                     Job[]
 }
 
+model SearchAnalytics {
+  id        String   @id @default(cuid())
+  query     String
+  results   Int
+  clicked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 model Test {
   id String @id @default(cuid())
+}
+
+model SavedJob {
+  id        String   @id @default(cuid())
+  userId    String
+  jobId     String
+  savedAt   DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  job       Job      @relation(fields: [jobId], references: [id])
+
+  @@unique([userId, jobId])
 }
