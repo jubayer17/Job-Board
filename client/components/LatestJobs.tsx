@@ -88,7 +88,7 @@ export default function LatestJobs() {
                 </div>
 
                 {/* 3x3 Grid Layout */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {latestJobs.map((job: Job) => (
                         <JobCard
                             key={job.id}
