@@ -81,11 +81,23 @@ export class Job {
     @Field(() => Int, { nullable: true })
     salaryMin?: number | null;
 
-    @Field(() => Int, { nullable: true })
+    @Field(() => String, { nullable: true })
     salaryMax?: number | null;
 
     @Field(() => Int)
     applicantsCount?: number;
+
+    @Field(() => [String], { defaultValue: [] })
+    benefits: string[];
+
+    @Field(() => String, { nullable: true })
+    responsibilities?: string | null;
+
+    @Field(() => [String], { defaultValue: [] })
+    skills: string[];
+
+    @Field(() => String, { nullable: true })
+    level?: string | null;
 }
 
 @ObjectType()
