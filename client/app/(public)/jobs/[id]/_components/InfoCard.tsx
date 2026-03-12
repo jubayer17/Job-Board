@@ -2,7 +2,7 @@ import React from "react";
 
 interface InfoCardProps {
     title: string;
-    content: string | null | undefined;
+    content: React.ReactNode;
 }
 
 export const InfoCard = ({ title, content }: InfoCardProps) => {
