@@ -1,31 +1,57 @@
-import React, { Suspense } from "react";
-import { getJobs } from "@/lib/services/job";
+"use client";
+
+import React, { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import JobCard from "@/components/JobCard";
 import SearchFilters from "@/components/SearchFilters";
 import { formatDistanceToNow } from "date-fns";
 
-export const dynamic = "force-dynamic";
+interface Job {
+    id: string;
+    title: string;
+    company: string;
+    location: string;
+    type: string;
+    salary?: string | null;
+    logo?: string | null;
+    tags: string[];
+    postedAt: string | Date;
+    salaryMax?: number | null;
+}
 
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+function LatestJobsContent() {
+    const searchParams = useSearchParams();
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-export default async function LatestJobsPage(props: { searchParams: SearchParams }) {
-    const searchParams = await props.searchParams;
+    useEffect(() => {
+        const fetchJobs = async () => {
+            setLoading(true);
+            setError(null);
 
-    const search = typeof searchParams.search === "string" ? searchParams.search : undefined;
-    const type = typeof searchParams.type === "string" ? searchParams.type : undefined;
-    const location = typeof searchParams.location === "string" ? searchParams.location : undefined;
-    const minSalary = typeof searchParams.minSalary === "string" ? parseInt(searchParams.minSalary) : undefined;
-    const maxSalary = typeof searchParams.maxSalary === "string" ? parseInt(searchParams.maxSalary) : undefined;
-    const sort = typeof searchParams.sort === "string" && (searchParams.sort === "asc" || searchParams.sort === "desc") ? searchParams.sort : "desc";
+            try {
+                const params = new URLSearchParams(searchParams.toString());
+                if (!params.has("sort")) {
+                    params.set("sort", "desc");
+                }
 
-    const jobs = await getJobs({
-        search,
-        type,
-        location,
-        sort,
-        minSalary,
-        maxSalary
-    });
+                const res = await fetch(`/api/jobs?${params.toString()}`, { cache: "no-store" });
+                if (!res.ok) {
+                    throw new Error("Failed to fetch jobs");
+                }
+                const data = await res.json();
+                setJobs(data as Job[]);
+            } catch (err: any) {
+                setError(err?.message || "Something went wrong");
+                setJobs([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchJobs();
+    }, [searchParams]);
 
     return (
         <main className="min-h-screen bg-gray-50 pt-24 pb-24">
@@ -51,38 +77,52 @@ export default async function LatestJobsPage(props: { searchParams: SearchParams
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Search Filters */}
-                <Suspense fallback={<div className="h-20 bg-gray-100 animate-pulse rounded-lg mb-10"></div>}>
-                    <SearchFilters />
-                </Suspense>
+                <SearchFilters />
 
-                {/* Grid Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {jobs.map((job) => (
-                        <JobCard
-                            key={job.id}
-                            job={{
-                                id: job.id,
-                                title: job.title,
-                                company: job.company,
-                                location: job.location,
-                                type: job.type,
-                                salary: job.salary || "Competitive",
-                                logo: job.logo || "🏢",
-                                tags: job.tags,
-                                posted: formatDistanceToNow(new Date(job.postedAt), { addSuffix: true }),
-                                salaryMax: job.salaryMax ?? undefined,
-                            }}
-                        />
-                    ))}
-                </div>
-
-                {jobs.length === 0 && (
+                {loading ? (
+                    <div className="flex justify-center items-center min-h-[50vh]">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-20 text-red-500">
+                        <h3 className="text-xl font-bold">Error loading jobs</h3>
+                        <p>{error}</p>
+                    </div>
+                ) : jobs.length === 0 ? (
                     <div className="text-center py-20">
                         <p className="text-gray-500 text-lg">No jobs found matching your criteria.</p>
                         <p className="text-gray-400 mt-2">Try adjusting your filters or search terms.</p>
                     </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {jobs.map((job) => (
+                            <JobCard
+                                key={job.id}
+                                job={{
+                                    id: job.id,
+                                    title: job.title,
+                                    company: job.company,
+                                    location: job.location,
+                                    type: job.type,
+                                    salary: job.salary || "Competitive",
+                                    logo: job.logo || "🏢",
+                                    tags: job.tags,
+                                    posted: formatDistanceToNow(new Date(job.postedAt), { addSuffix: true }),
+                                    salaryMax: job.salaryMax ?? undefined,
+                                }}
+                            />
+                        ))}
+                    </div>
                 )}
             </div>
         </main>
+    );
+}
+
+export default function LatestJobsPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gray-50 pt-24 pb-24" />}>
+            <LatestJobsContent />
+        </Suspense>
     );
 }
