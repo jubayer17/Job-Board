@@ -5,7 +5,8 @@ import { PrismaClient } from '@prisma/client';
 @Injectable()
 export class PrismaService
   extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy {
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor() {
     super(); // Prisma 6.19 reads DATABASE_URL from schema.prisma
   }
