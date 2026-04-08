@@ -4,8 +4,8 @@
 
 type User {
   id: String!
-  name: String!
-  email: String!
+  name: String
+  email: String
 }
 
 type Location {
@@ -17,10 +17,24 @@ type Location {
   isActive: Boolean!
 }
 
+type EmployerPublic {
+  contactName: String!
+  contactEmail: String!
+}
+
+type CompanyPublic {
+  companyName: String!
+  description: String
+  websiteUrl: String
+  address: String
+  industryType: String
+}
+
 type Job {
   id: String!
   title: String!
   company: String!
+  location: String!
   locationId: String
   locationRelation: Location
   type: String!
@@ -38,24 +52,55 @@ type Job {
   gender: String
   employerId: String
   companyId: String
+  employer: EmployerPublic
+  companyRelation: CompanyPublic
   applyLink: String
   logo: String
   logoPublicId: String
   logoOriginalName: String
   logoUploadedAt: DateTime
   salaryMin: Int
-  salaryMax: String
+  salaryMax: Int
   applicantsCount: Int!
+  applications: [Application!]
   benefits: [String!]!
   responsibilities: String
   skills: [String!]!
   level: String
+  roleCategory: String
+  workModel: String
+  companyCulture: String
+  careerGrowth: String
+  interviewProcess: String
+  industrySpecificRequirements: String
+  compensationCurrency: String
+  payPeriod: String
+  bonusDetails: String
+  equityDetails: String
+  skillsAdvanced: [String!]!
+  skillsIntermediate: [String!]!
+  skillsFoundational: [String!]!
+  softSkills: [String!]!
+  certifications: [String!]!
+  experienceMinYears: Int
+  experienceMaxYears: Int
+  travelRequirement: String
 }
 
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+type Application {
+  id: String!
+  jobId: String!
+  userId: String!
+  status: String!
+  appliedAt: DateTime!
+  user: User!
+  job: Job!
+}
 
 type EmployerStats {
   activeJobs: Int!
@@ -76,6 +121,7 @@ type Company {
   employerId: String!
   createdAt: DateTime!
   updatedAt: DateTime!
+  jobs: [Job!]
 }
 
 type Employer {
@@ -92,10 +138,14 @@ type Employer {
 type Query {
   hello: String!
   jobs: [Job!]!
+  job(id: String!): Job
   myJobs(userId: String!): [Job!]!
   employerJobs(employerId: String!): [Job!]!
   employerStats(employerId: String!): EmployerStats!
+  employerApplications(employerId: String!): [Application!]!
+  jobApplications(jobId: String!, employerId: String!): [Application!]!
   employer(id: String!): Employer!
+  company(id: String!): Company
 }
 
 type Mutation {
@@ -137,6 +187,24 @@ input CreateJobInput {
   logoPublicId: String
   logoOriginalName: String
   logoUploadedAt: DateTime
+  roleCategory: String
+  workModel: String
+  companyCulture: String
+  careerGrowth: String
+  interviewProcess: String
+  industrySpecificRequirements: String
+  compensationCurrency: String
+  payPeriod: String
+  bonusDetails: String
+  equityDetails: String
+  skillsAdvanced: [String!]
+  skillsIntermediate: [String!]
+  skillsFoundational: [String!]
+  softSkills: [String!]
+  certifications: [String!]
+  experienceMinYears: Float
+  experienceMaxYears: Float
+  travelRequirement: String
   companyId: String!
   locationId: String!
 }
