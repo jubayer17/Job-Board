@@ -60,7 +60,8 @@ export async function GET(req: Request) {
         });
 
         if (!res.ok) {
-            return NextResponse.json({ error: "Failed to fetch jobs from backend" }, { status: 502 });
+            console.error(`Backend returned ${res.status}`);
+            return NextResponse.json([], { status: 200 });
         }
 
         const payload = (await res.json()) as {
@@ -117,7 +118,7 @@ export async function GET(req: Request) {
         return NextResponse.json(jobs);
     } catch (error) {
         console.error("API Error:", error);
-        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+        return NextResponse.json([], { status: 200 });
     }
 }
 
