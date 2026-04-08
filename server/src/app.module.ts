@@ -19,7 +19,10 @@ import { LocationModule } from './location/location.module';
     PrismaModule, // Provides PrismaService globally
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: process.env.VERCEL ? true : join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile:
+        process.env.VERCEL || process.env.NODE_ENV === 'production'
+          ? true
+          : join(process.cwd(), 'src/schema.gql'),
       playground: false,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
       introspection: true,
@@ -33,4 +36,4 @@ import { LocationModule } from './location/location.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
