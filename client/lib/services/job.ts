@@ -65,8 +65,77 @@ export const getJobById = cache(async (id: string): Promise<JobWithPoster | null
         });
         return job as unknown as JobWithPoster | null;
     } catch (error) {
-        console.error("Fetch Job Error:", error);
-        return null;
+        try {
+            const graphqlUrl = process.env.NEXT_PUBLIC_API_URL
+                ? `${process.env.NEXT_PUBLIC_API_URL}/graphql`
+                : "https://job-board-backend-iota.vercel.app/graphql";
+
+            const res = await fetch(graphqlUrl, {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                    query: `
+                        query Job($id: String!) {
+                            job(id: $id) {
+                                id
+                                title
+                                company
+                                location
+                                type
+                                vacancies
+                                experience
+                                education
+                                workplace
+                                jobContext
+                                gender
+                                deadline
+                                description
+                                salary
+                                salaryMin
+                                salaryMax
+                                logo
+                                tags
+                                postedAt
+                                applyLink
+                                benefits
+                                responsibilities
+                                skills
+                                level
+                                employer { contactName contactEmail }
+                                companyRelation { companyName description websiteUrl address industryType }
+                            }
+                        }
+                    `,
+                    variables: { id },
+                }),
+                cache: "no-store",
+            });
+
+            if (!res.ok) return null;
+
+            const payload = (await res.json()) as {
+                data?: { job?: any };
+                errors?: Array<{ message?: string }>;
+            };
+
+            if (payload.errors?.length) return null;
+
+            const job = payload.data?.job;
+            if (!job) return null;
+
+            return {
+                ...job,
+                postedAt: new Date(job.postedAt),
+                deadline: job.deadline ? new Date(job.deadline) : null,
+                benefits: job.benefits ?? [],
+                skills: job.skills ?? [],
+                tags: job.tags ?? [],
+            } as JobWithPoster;
+        } catch (fallbackError) {
+            console.error("Fetch Job Error:", error);
+            console.error("Fetch Job GraphQL Fallback Error:", fallbackError);
+            return null;
+        }
     }
 });
 
