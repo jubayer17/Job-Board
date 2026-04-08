@@ -30,13 +30,21 @@ export default function FeaturedJobs() {
         let active = true;
         (async () => {
             try {
-                const res = await fetch("/api/jobs?sort=desc", { cache: "no-store" });
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://job-board-t9m8.onrender.com";
+                const res = await fetch(`${apiUrl}/graphql`, {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({
+                        query: `query { jobs { id title company location type salary logo tags postedAt salaryMin salaryMax } }`
+                    }),
+                });
                 if (!res.ok) throw new Error("Failed to fetch jobs");
-                const data = await res.json();
-                const sorted = (data as Job[])
+                const payload = await res.json();
+                const jobs = (payload?.data?.jobs ?? []) as Job[];
+                const sorted = jobs
                     .sort((a, b) => (b.salaryMax ?? 0) - (a.salaryMax ?? 0))
                     .slice(0, 6);
-                if (active) setJobs(sorted as Job[]);
+                if (active) setJobs(sorted);
             } catch (e: any) {
                 if (active) setError(e.message || "Error loading jobs");
             } finally {

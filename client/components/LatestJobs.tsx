@@ -29,11 +29,18 @@ export default function LatestJobs() {
         let active = true;
         (async () => {
             try {
-                const res = await fetch("/api/jobs?sort=desc", { cache: "no-store" });
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://job-board-t9m8.onrender.com";
+                const res = await fetch(`${apiUrl}/graphql`, {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({
+                        query: `query { jobs { id title company location type salary logo tags postedAt salaryMin salaryMax } }`
+                    }),
+                });
                 if (!res.ok) throw new Error("Failed to fetch jobs");
-                const data = await res.json();
-                const latest = (data as Job[]).slice(0, 9);
-                if (active) setJobs(latest as Job[]);
+                const payload = await res.json();
+                const latest = ((payload?.data?.jobs ?? []) as Job[]).slice(0, 9);
+                if (active) setJobs(latest);
             } catch (e: any) {
                 if (active) setError(e.message || "Error loading jobs");
             } finally {

@@ -33,31 +33,23 @@ export async function GET(req: Request) {
             ? `${process.env.NEXT_PUBLIC_API_URL}/graphql`
             : "https://job-board-t9m8.onrender.com/graphql";
 
-        const res = await fetch(graphqlUrl, {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-                query: `
-                    query Jobs {
-                        jobs {
-                            id
-                            title
-                            company
-                            location
-                            type
-                            description
-                            salary
-                            logo
-                            tags
-                            postedAt
-                            salaryMin
-                            salaryMax
-                        }
-                    }
-                `,
-            }),
-            cache: "no-store",
-        });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+        let res: Response;
+        try {
+            res = await fetch(graphqlUrl, {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({
+                    query: `query Jobs { jobs { id title company location type description salary logo tags postedAt salaryMin salaryMax } }`,
+                }),
+                cache: "no-store",
+                signal: controller.signal,
+            });
+        } finally {
+            clearTimeout(timeoutId);
+        }
 
         if (!res.ok) {
             console.error(`Backend returned ${res.status}`);
