@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class EmployerService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async create(createEmployerInput: CreateEmployerInput) {
     const {
@@ -45,8 +45,8 @@ export class EmployerService {
             description,
             address,
             websiteUrl,
-          }
-        }
+          },
+        },
       },
     });
   }
