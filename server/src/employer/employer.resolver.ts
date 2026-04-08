@@ -5,7 +5,7 @@ import { CreateEmployerInput } from './dto/create-employer.input';
 
 @Resolver(() => Employer)
 export class EmployerResolver {
-  constructor(private readonly employerService: EmployerService) { }
+  constructor(private readonly employerService: EmployerService) {}
 
   @Query(() => Employer, { name: 'employer' })
   async findOne(@Args('id', { type: () => String }) id: string) {
@@ -13,7 +13,9 @@ export class EmployerResolver {
   }
 
   @Mutation(() => Employer)
-  async createEmployer(@Args('createEmployerInput') createEmployerInput: CreateEmployerInput) {
+  async createEmployer(
+    @Args('createEmployerInput') createEmployerInput: CreateEmployerInput,
+  ) {
     return this.employerService.create(createEmployerInput);
   }
 
