@@ -4,7 +4,7 @@ import { JobResolver } from './job.resolver';
 import { PrismaModule } from '../prisma.module';
 
 @Module({
-    imports: [PrismaModule],
-    providers: [JobService, JobResolver],
+  imports: [PrismaModule],
+  providers: [JobService, JobResolver],
 })
 export class JobModule {}
