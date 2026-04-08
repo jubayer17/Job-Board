@@ -5,7 +5,7 @@ import { ApolloProvider } from "@apollo/client/react";
 
 const client = new ApolloClient({
   link: new HttpLink({
-    uri: process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/graphql` : "https://job-board-backend-iota.vercel.app/graphql",
+    uri: process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/graphql` : "https://job-board-t9m8.onrender.com/graphql",
   }),
 
   cache: new InMemoryCache(),
