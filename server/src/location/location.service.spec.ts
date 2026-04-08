@@ -30,7 +30,7 @@ describe('LocationService', () => {
     }).compile();
 
     service = module.get<LocationService>(LocationService);
-    prisma = module.get(PrismaService) as any;
+    prisma = module.get(PrismaService);
   });
 
   it('uses isActive filter when fetching locations', async () => {
@@ -44,4 +44,3 @@ describe('LocationService', () => {
     });
   });
 });
-
