@@ -68,7 +68,7 @@ export const getJobById = cache(async (id: string): Promise<JobWithPoster | null
         try {
             const graphqlUrl = process.env.NEXT_PUBLIC_API_URL
                 ? `${process.env.NEXT_PUBLIC_API_URL}/graphql`
-                : "https://job-board-t9m8.onrender.com/graphql";
+                : "https://job-board-backend-iota.vercel.app/graphql";
 
             const res = await fetch(graphqlUrl, {
                 method: "POST",
