@@ -57,7 +57,7 @@ export default function LocationDropdown({
             while (attempts < maxAttempts) {
                 try {
                     // Use env variable or fallback to localhost
-                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://job-board-t9m8.onrender.com";
+                    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://job-board-backend-iota.vercel.app";
                     const res = await fetch(`${apiUrl}/api/locations`);
 
                     if (!res.ok) {
