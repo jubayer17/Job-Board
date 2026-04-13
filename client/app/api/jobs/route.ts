@@ -31,7 +31,7 @@ export async function GET(req: Request) {
 
         const graphqlUrl = process.env.NEXT_PUBLIC_API_URL
             ? `${process.env.NEXT_PUBLIC_API_URL}/graphql`
-            : "https://job-board-t9m8.onrender.com/graphql";
+            : "https://job-board-backend-iota.vercel.app/graphql";
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
