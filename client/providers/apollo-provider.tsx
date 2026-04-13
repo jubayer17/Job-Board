@@ -9,7 +9,7 @@ export default function ApolloWrapper({ children }: { children: React.ReactNode 
     link: new HttpLink({
       uri: process.env.NEXT_PUBLIC_API_URL
         ? `${process.env.NEXT_PUBLIC_API_URL}/graphql`
-        : "https://job-board-t9m8.onrender.com/graphql",
+        : "https://job-board-backend-iota.vercel.app/graphql",
     }),
     cache: new InMemoryCache(),
   }), []);
