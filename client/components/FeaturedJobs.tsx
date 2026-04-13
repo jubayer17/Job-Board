@@ -30,7 +30,7 @@ export default function FeaturedJobs() {
         let active = true;
         (async () => {
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://job-board-t9m8.onrender.com";
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://job-board-backend-iota.vercel.app";
                 const res = await fetch(`${apiUrl}/graphql`, {
                     method: "POST",
                     headers: { "content-type": "application/json" },
